@@ -1,0 +1,22 @@
+{
+  "name": "Go Starter V2",
+  "dockerComposeFile": "compose.yaml",
+  "service": "app",
+  "workspaceFolder": "/app",
+  
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "golang.go"
+      ],
+      "settings": {
+        "go.toolsManagement.checkForUpdates": "local",
+        "go.useLanguageServer": true,
+        "go.gopath": "/go"
+      }
+    }
+  },
+
+  // Pastikan user root agar tidak ada isu permission file saat generate folder nanti
+  "remoteUser": "root"
+}

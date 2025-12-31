@@ -1,0 +1,48 @@
+# --- Binaries & Build Output ---
+/bin/
+/dist/
+/tmp/
+main
+main.exe
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+debug
+
+# --- Go Modules ---
+/vendor/
+
+# --- Environment Variables (PENTING) ---
+.env
+.env.local
+.env.*.local
+# Kecuali example (template env wajib disimpan)
+! .env.example
+
+# --- IDE & Editor Config ---
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# --- Logs ---
+*.log
+air_errors.log
+npm-debug.log*
+
+# --- Testing & Coverage ---
+coverage.out
+coverage.html
+profile.out
+
+# --- Docker/Podman Mounts (Jaga-jaga) ---
+# Jika nanti mount folder DB ke local folder
+mysql_data/
+pg_data/
+redis_data/

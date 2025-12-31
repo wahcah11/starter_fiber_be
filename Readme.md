@@ -1,0 +1,36 @@
+# Build dockerfile
+podman build -t my-go-starter-img -f .devcontainer/Dockerfile .
+
+
+# 1. Inisialisasi Module (jika belum)
+go mod init starter-wahcah-be
+
+# 2. Download Library Utama
+go get github.com/gofiber/fiber/v2
+go get gorm.io/gorm
+go get gorm.io/driver/mysql             # Driver MySQL (Sesuai container Anda)
+go get golang.org/x/crypto/bcrypt       # Untuk Hash Password
+go get github.com/golang-jwt/jwt/v5     # Untuk Token
+go get github.com/joho/godotenv         # Untuk .env
+go get github.com/go-playground/validator/v10 # Untuk Validasi Input
+
+# 3. Rapikan
+go mod tidy
+
+# jalankan
+air
+
+
+---
+# Test endpoint
+
+```url
+POST http://localhost:9090/api/auth/register-test
+POST http://localhost:9090/api/auth/login
+```
+
+request raw body :
+```json
+{"email": "admin@example.com", "password": "password123"}
+```
+
