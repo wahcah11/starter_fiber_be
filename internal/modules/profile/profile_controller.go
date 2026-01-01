@@ -14,7 +14,7 @@ func NewProfileController(service Service) *Controller {
 
 func (c *Controller) GetProfile(ctx *fiber.Ctx) error {
 	// Ambil userID dari JWT middleware
-	userID, ok := ctx.Locals("userID").(uint)
+	userID, ok := ctx.Locals("user_id").(uint)
 	if !ok {
 		return ctx.Status(401).JSON(fiber.Map{"error": "Unauthorized"})
 	}

@@ -3,6 +3,7 @@ package router
 import (
 	"starter-wahcah-be/internal/modules/auth/login"
 	"starter-wahcah-be/internal/modules/profile"
+	userRoute "starter-wahcah-be/internal/modules/user/router"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -18,4 +19,6 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	login.InitRoutes(api, db)
 	// Profile
 	profile.InitRoutes(api, db)
+	// Admin bro
+	userRoute.InitRoutes(api, db)
 }

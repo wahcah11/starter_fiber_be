@@ -24,6 +24,7 @@ func (c *Controller) Login(ctx *fiber.Ctx) error {
 		return ctx.Status(400).JSON(fiber.Map{"error": "Invalid JSON"})
 	}
 
+
 	if errs := util.ValidateStruct(req); errs != nil {
 		return ctx.Status(400).JSON(fiber.Map{"validation": errs})
 	}
@@ -67,14 +68,6 @@ func (c *Controller) Register(ctx *fiber.Ctx) error {
 		return ctx.Status(500).JSON(fiber.Map{"error": "Failed to create user"})
 	}
 
-	// 5. Generate JWT token
-	token, err := util.GenerateToken(user.ID)
-	if err != nil {
-		return ctx.Status(500).JSON(fiber.Map{"error": "Failed to generate token"})
-	}
-
-	// 6. Simpan token ke user
-	c.db.Model(&user).Update("Token", token)
 
 	// 7. Return response
 	return ctx.Status(201).JSON(fiber.Map{
@@ -84,7 +77,6 @@ func (c *Controller) Register(ctx *fiber.Ctx) error {
 			"firstName": user.FirstName,
 			"lastName":  user.LastName,
 			"email":     user.Email,
-			"token":     token,
 			"createdAt": user.CreatedAt.Format(time.RFC3339),
 		},
 	})

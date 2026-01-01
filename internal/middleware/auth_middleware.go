@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"os"
 	"starter-wahcah-be/internal/util"
 	"strings"
@@ -47,9 +48,11 @@ func JWTMiddleware(ctx *fiber.Ctx) error {
 	claims, err := util.ParseToken(tokenStr)
 
 	if err != nil {
-		return ctx.Status(401).JSON(fiber.Map{"error": "Invalid token"})
+		return ctx.Status(401).JSON(fiber.Map{"error": "Token Tidak cocok"})
 	}
 
 	ctx.Locals("userID", claims.UserID)
+	fmt.Println(ctx.Locals("userID"))
+
 	return ctx.Next()
 }

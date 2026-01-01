@@ -13,6 +13,6 @@ func InitRoutes(router fiber.Router, db *gorm.DB) {
 	svc := NewProfileService(repo)
 	ctrl := NewProfileController(svc)
 
-	user := router.Group("/user")
-	user.Get("/profile", middleware.JWTMiddleware, ctrl.GetProfile)
+	user := router.Group("/auth")
+	user.Get("/profile", middleware.Protected(), ctrl.GetProfile)
 }
