@@ -6,5 +6,19 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	Token string `json:"token"`
+	Token     string `json:"token"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+}
+
+type RegisterRequest struct {
+	FirstName string `json:"firstName" validate:"required,min=2,max=50"`
+	LastName  string `json:"lastName" validate:"required,min=2,max=50"`
+	Email     string `json:"email" validate:"required,email"`
+	Password  string `json:"password" validate:"required,min=6"`
+}
+
+type ProfileResponse struct {
+	Name  string `json:"name"`
+	Email string `json:"email"`
 }

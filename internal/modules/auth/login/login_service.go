@@ -29,7 +29,7 @@ func (s *service) Authenticate(req LoginRequest) (*LoginResponse, error) {
 	}
 
 	token, _ := util.GenerateToken(user.ID)
-	return &LoginResponse{Token: token}, nil
+	return &LoginResponse{Token: token, FirstName: user.FirstName, LastName: user.LastName}, nil
 }
 
 func (s *service) RegisterUser(email, password string) error {
@@ -37,3 +37,5 @@ func (s *service) RegisterUser(email, password string) error {
 	user := User{Email: email, Password: hashed}
 	return s.repo.CreateUser(&user)
 }
+
+

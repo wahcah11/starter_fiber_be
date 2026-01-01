@@ -1,0 +1,29 @@
+package profile
+
+import "starter-wahcah-be/internal/modules/auth/login"
+
+type Service interface {
+	GetProfile(userID uint) (*login.ProfileResponse, error)
+}
+
+type service struct {
+	repo Repository
+}
+
+func NewProfileService(repo Repository) Service {
+	return &service{repo: repo}
+}
+
+func (s *service) GetProfile(userID uint) (*login.ProfileResponse, error) {
+	user, err := s.repo.FindByID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	fullName := user.FirstName + " " + user.LastName
+
+	return &login.ProfileResponse{
+		Name:  fullName,
+		Email: user.Email,
+	}, nil
+}

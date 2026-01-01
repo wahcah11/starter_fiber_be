@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"os"
+	"starter-wahcah-be/internal/util"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -31,4 +32,24 @@ func Protected() fiber.Handler {
 
 		return c.Next()
 	}
+}
+
+// JWR Middleware
+
+func JWTMiddleware(ctx *fiber.Ctx) error {
+	authHeader := ctx.Get("Authorization")
+	if authHeader == "" {
+		return ctx.Status(401).JSON(fiber.Map{"error": "Missing token"})
+	}
+
+	tokenStr :=strings.TrimPrefix(authHeader, "Bearer ")
+
+	claims, err := util.ParseToken(tokenStr)
+
+	if err != nil {
+		return ctx.Status(401).JSON(fiber.Map{"error": "Invalid token"})
+	}
+
+	ctx.Locals("userID", claims.UserID)
+	return ctx.Next()
 }
