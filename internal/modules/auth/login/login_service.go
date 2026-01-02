@@ -6,8 +6,8 @@ import (
 )
 
 type Service interface {
-	Authenticate(req LoginRequest) (*LoginResponse, error)
-	RegisterUser(email, password, firstname, lastname string) error // Helper buat bikin user
+    Authenticate(req LoginRequest) (*LoginResponse, error)
+    RegisterUser(req LoginRequest) error
 }
 
 type service struct {
@@ -19,33 +19,33 @@ func NewLoginService(repo Repository) Service {
 }
 
 func (s *service) Authenticate(req LoginRequest) (*LoginResponse, error) {
-	user, err := s.repo.FindByEmail(req.Email)
-	if err != nil {
-		return nil, errors.New("invalid email or password")
-	}
+    user, err := s.repo.FindByEmail(req.Email)
+    if err != nil {
+        return nil, errors.New("invalid email or password")
+    }
 
-	if !util.CheckPasswordHash(req.Password, user.Password) {
-		return nil, errors.New("invalid email or password")
-	}
+    if !util.CheckPasswordHash(req.Password, user.Password) {
+        return nil, errors.New("invalid email or password")
+    }
 
-	token, _ := util.GenerateToken(user.ID)
+    token, _ := util.GenerateToken(user.ID)
 
-	return &LoginResponse{
-		Token:     token,
-		Firstname: user.Firstname,
-		Lastname:  user.Lastname,
-	}, nil
+    return &LoginResponse{
+        Token:     token,
+        Firstname: user.Firstname,
+        Lastname:  user.Lastname,
+    }, nil
 }
 
-func (s *service) RegisterUser(email, password, firstname, lastname string) error {
-	hashed, _ := util.HashPassword(password)
+func (s *service) RegisterUser(req LoginRequest) error {
+    hashed, _ := util.HashPassword(req.Password)
 
-	user := User{
-		Email:     email,
-		Password:  hashed,
-		Firstname: firstname,
-		Lastname:  lastname,
-	}
+    user := User{
+        Firstname: req.Firstname,
+        Lastname:  req.Lastname,
+        Email:     req.Email,
+        Password:  hashed,
+    }
 
-	return s.repo.CreateUser(&user)
+    return s.repo.CreateUser(&user)
 }
