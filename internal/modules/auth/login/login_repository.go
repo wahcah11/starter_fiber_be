@@ -33,6 +33,7 @@ func (r *repository) CreateUser(user *User) error {
 // For Profile Repository
 func (r *repository) FindByID(userID uint) (*User, error) {
 	var user User
+	
 	err := r.db.First(&user, userID).Error
 	if err != nil {
 		return nil, err

@@ -19,9 +19,7 @@ func (s *service) GetProfile(userID uint) (*ProfileResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	fullName := user.FirstName + " " + user.LastName
-
 	return &ProfileResponse{
 		Name:  fullName,
 		Email: user.Email,

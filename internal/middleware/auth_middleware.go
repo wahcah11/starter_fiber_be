@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"starter-wahcah-be/internal/util"
 	"strings"
@@ -30,6 +31,7 @@ func Protected() fiber.Handler {
 		claims := token.Claims.(jwt.MapClaims)
 		// Simpan user_id ke Locals agar bisa dipakai di Controller
 		c.Locals("user_id", uint(claims["user_id"].(float64)))
+		log.Print("User id : ", uint(claims["user_id"].(float64)))
 
 		return c.Next()
 	}
