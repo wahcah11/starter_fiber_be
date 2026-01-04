@@ -18,6 +18,7 @@ func NewUserController(svc service.UserService) *UserController {
 	return &UserController{service: svc}
 }
 
+
 func (c *UserController) CreateUser(ctx *fiber.Ctx) error {
 
 	var req dto.CreateRequest
@@ -30,8 +31,6 @@ func (c *UserController) CreateUser(ctx *fiber.Ctx) error {
 		return ctx.Status(400).JSON(fiber.Map{"validation": errs})
 	}
 
-
-
 	// 4. Buat user
 	user := model.User{
 		FirstName: req.FirstName,
@@ -40,9 +39,6 @@ func (c *UserController) CreateUser(ctx *fiber.Ctx) error {
 		Role: req.Role,
 		Password:  req.Password,
 	}
-
-
-
 
 	if err := c.service.CreateUser(&user); err != nil {
 		return ctx.Status(500).JSON(fiber.Map{"error": err.Error()})

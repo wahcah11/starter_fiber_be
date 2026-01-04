@@ -82,28 +82,5 @@ func (c *Controller) Register(ctx *fiber.Ctx) error {
 	})
 }
 
-func (c *Controller) GetProfile(ctx *fiber.Ctx) error {
-	userID, ok := ctx.Locals("userID").(uint)
 
-	if(!ok) {
-		return ctx.Status(401).JSON(fiber.Map{"error": "Unautorized"})
-
-	}
-	var user User
-
-	if err := c.db.First(&user, userID).Error; err != nil {
-		return ctx.Status(404).JSON(fiber.Map{"error": "User not Found"})
-
-
-	}
-
-	fullName := user.FirstName + " " + user.LastName
-
-	res := ProfileResponse {
-		Name: fullName,
-		Email: user.Email,
-	}
-
-	return ctx.Status(200).JSON(res)
-}
 

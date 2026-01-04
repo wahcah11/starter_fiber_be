@@ -23,9 +23,6 @@ func main() {
 	app.Get("/", Hello)
 	// 4. Setup Routes
 	router.SetupRoutes(app, db)
-
-
-
 	// 5. Start (Port 8080 sesuai expose dockerfile)
 	app.Listen(":8080")
 }

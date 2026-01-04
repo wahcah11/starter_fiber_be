@@ -12,9 +12,7 @@ import (
 
 func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	app.Use(logger.New())
-
 	api := app.Group("/api")
-
 	// Auth
 	login.InitRoutes(api, db)
 	// Profile

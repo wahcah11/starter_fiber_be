@@ -3,18 +3,18 @@ package profile
 import "starter-wahcah-be/internal/modules/auth/login"
 
 type Service interface {
-	GetProfile(userID uint) (*login.ProfileResponse, error)
+	GetProfile(userID uint) (*ProfileResponse, error)
 }
 
 type service struct {
-	repo Repository
+	repo login.Repository
 }
 
-func NewProfileService(repo Repository) Service {
+func NewProfileService(repo login.Repository) Service {
 	return &service{repo: repo}
 }
 
-func (s *service) GetProfile(userID uint) (*login.ProfileResponse, error) {
+func (s *service) GetProfile(userID uint) (*ProfileResponse, error) {
 	user, err := s.repo.FindByID(userID)
 	if err != nil {
 		return nil, err
@@ -22,7 +22,7 @@ func (s *service) GetProfile(userID uint) (*login.ProfileResponse, error) {
 
 	fullName := user.FirstName + " " + user.LastName
 
-	return &login.ProfileResponse{
+	return &ProfileResponse{
 		Name:  fullName,
 		Email: user.Email,
 	}, nil
