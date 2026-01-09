@@ -21,18 +21,38 @@ func NewController(service Service) *Controller {
 	return &Controller{service}
 }
 
-func (c *Controller) Register(ctx *fiber.Ctx) error {
-	var req RegisterRequest
-	if err := ctx.BodyParser(&req); err != nil {
-		return ctx.Status(400).JSON(fiber.Map{"error": err.Error()})
-	}
+func (c *Controller) RegisterTest(ctx *fiber.Ctx) error {
+    var req RegisterRequest
+    if err := ctx.BodyParser(&req); err != nil {
+        return ctx.Status(400).JSON(fiber.Map{"error": "Invalid JSON"})
+    }
 
-	if err := c.service.Register(req); err != nil {
-		return ctx.Status(500).JSON(fiber.Map{"error": err.Error()})
-	}
+    // Simpan langsung semua field (first_name, last_name, email, password)
+    if err := c.service.Register(req); err != nil {
+        return ctx.Status(500).JSON(fiber.Map{"error": err.Error()})
+    }
 
-	return ctx.JSON(RegisterResponse{Message: "register success"})
+    return ctx.JSON(fiber.Map{
+        "message": "Test user created",
+        "first_name": req.FirstName,
+        "last_name": req.LastName,
+        "email": req.Email,
+    })
 }
+
+
+// func (c *Controller) Register(ctx *fiber.Ctx) error {
+// 	var req RegisterRequest
+// 	if err := ctx.BodyParser(&req); err != nil {
+// 		return ctx.Status(400).JSON(fiber.Map{"error": err.Error()})
+// 	}
+
+// 	if err := c.service.Register(req); err != nil {
+// 		return ctx.Status(500).JSON(fiber.Map{"error": err.Error()})
+// 	}
+
+// 	return ctx.JSON(RegisterResponse{Message: "register success"})
+// }
 
 func (c *Controller) Login(ctx *fiber.Ctx) error {
 	var req LoginRequest
@@ -101,9 +121,9 @@ func (c *Controller) Login(ctx *fiber.Ctx) error {
 // }
 
 // Endpoint tambahan buat bikin user pertama kali (biar bisa tes login)
-func (c *Controller) RegisterTest(ctx *fiber.Ctx) error {
-	var req LoginRequest
-	ctx.BodyParser(&req)
-	c.service.RegisterUser(req.Email, req.Password)
-	return ctx.JSON(fiber.Map{"message": "User created"})
-}
+// func (c *Controller) RegisterTest(ctx *fiber.Ctx) error {
+// 	var req LoginRequest
+// 	ctx.BodyParser(&req)
+// 	c.service.RegisterUser(req.Email, req.Password)
+// 	return ctx.JSON(fiber.Map{"message": "User created"})
+// }
