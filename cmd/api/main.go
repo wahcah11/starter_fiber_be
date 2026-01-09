@@ -6,11 +6,15 @@ import (
 	"starter-wahcah-be/internal/router"
 
 	"github.com/gofiber/fiber/v2"
+	
 )
 
 func main() {
 	// 1. Konek DB
 	db := config.NewDatabase()
+//	if db == nil {
+//	log.Println("Running without database connection")
+//}
 
 	// 2. Auto Migrate (Hanya di dev environment)
 	db.AutoMigrate(&login.User{})

@@ -5,9 +5,21 @@ import (
 	"starter-wahcah-be/internal/util"
 )
 
+// type Service interface {
+// 	Authenticate(req LoginRequest) (*LoginResponse, error)
+// 	RegisterUser(email, password string) error // Helper buat bikin user
+// }
+
+// type service struct {
+// 	repo Repository
+// }
+
+
 type Service interface {
-	Authenticate(req LoginRequest) (*LoginResponse, error)
-	RegisterUser(email, password string) error // Helper buat bikin user
+	Register(req RegisterRequest) error
+	Login(req LoginRequest) (User, error)
+	RegisterUser(email, password string) error
+	GetByID(id uint) (User, error)
 }
 
 type service struct {
@@ -17,6 +29,31 @@ type service struct {
 func NewLoginService(repo Repository) Service {
 	return &service{repo}
 }
+
+func (s *service) Register(req RegisterRequest) error {
+	return s.repo.Register(req)
+}
+
+func (s *service) Login(req LoginRequest) (User, error) {
+	return s.repo.Login(req)
+}
+
+// func (s *service) RegisterUser(email, password string) error {
+// 	user := User{
+// 		Email:    email,
+// 		Password: password,
+// 	}
+// 	return s.repo.CreateUser(&user)
+// }
+
+func (s *service) GetByID(id uint) (User, error) {
+	return s.repo.GetByID(id)
+}
+
+
+// func NewLoginService(repo Repository) Service {
+// 	return &service{repo}
+// }
 
 func (s *service) Authenticate(req LoginRequest) (*LoginResponse, error) {
 	user, err := s.repo.FindByEmail(req.Email)

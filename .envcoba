@@ -1,0 +1,12 @@
+# Database Configuration
+DB_HOST=db
+DB_PORT=3306
+DB_USER=starter_user
+DB_PASSWORD=
+DB_NAME=starter_db
+
+# Security
+JWT_SECRET=change_this_secret_in_prod
+
+# App Config
+APP_PORT=8080
