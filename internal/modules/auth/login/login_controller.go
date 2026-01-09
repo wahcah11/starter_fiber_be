@@ -41,13 +41,13 @@ func (c *Controller) Login(ctx *fiber.Ctx) error {
 	}
 
 	user, err := c.service.Login(req)
-	if err != nil {
+	if err != nil{
 		return ctx.Status(401).JSON(fiber.Map{"error": "invalid credentials"})
 	}
 
 	claims := jwt.MapClaims{
 		"user_id": user.ID,
-		"exp":     time.Now().Add(time.Hour * 24).Unix(),
+		"exp": time.Now().Add(time.Hour * 24).Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -55,11 +55,39 @@ func (c *Controller) Login(ctx *fiber.Ctx) error {
 	t, _ := token.SignedString([]byte(secret))
 
 	return ctx.JSON(LoginResponse{
-		Token:     t,
+		Token: t,
 		FirstName: user.FirstName,
-		LastName:  user.LastName,
+		LastName: user.LastName,
 	})
+	
 }
+
+// func (c *Controller) Login(ctx *fiber.Ctx) error {
+// 	var req LoginRequest
+// 	if err := ctx.BodyParser(&req); err != nil {
+// 		return ctx.Status(400).JSON(fiber.Map{"error": "Invalid JSON"})
+// 	}
+
+// 	user, err := c.service.Login(req)
+// 	if err != nil {
+// 		return ctx.Status(401).JSON(fiber.Map{"error": "invalid credentials"})
+// 	}
+
+// 	claims := jwt.MapClaims{
+// 		"user_id": user.ID,
+// 		"exp":     time.Now().Add(time.Hour * 24).Unix(),
+// 	}
+
+// 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+// 	secret := os.Getenv("JWT_SECRET")
+// 	t, _ := token.SignedString([]byte(secret))
+
+// 	return ctx.JSON(LoginResponse{
+// 		Token:     t,
+// 		FirstName: user.FirstName,
+// 		LastName:  user.LastName,
+// 	})
+// }
 // 	if errs := util.ValidateStruct(req); errs != nil {
 // 		return ctx.Status(400).JSON(fiber.Map{"validation": errs})
 // 	}
