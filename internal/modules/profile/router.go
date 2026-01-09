@@ -15,5 +15,5 @@ func InitRoutes(router fiber.Router, db *gorm.DB) {
 	ctrl := NewProfileController(svc)
 
 	user := router.Group("/auth")
-	user.Get("/profile", middleware.Protected(), ctrl.GetProfile)
+	user.Get("/getprofile", middleware.Protected(), ctrl.GetProfile)
 }

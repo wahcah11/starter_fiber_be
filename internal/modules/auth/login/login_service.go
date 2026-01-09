@@ -27,9 +27,13 @@ func (s *service) Authenticate(req LoginRequest) (*LoginResponse, error) {
 	if !util.CheckPasswordHash(req.Password, user.Password) {
 		return nil, errors.New("invalid email or password")
 	}
+	type userValue struct {
+		FirstName string `json:"first_name"`
+		LastName string `json:"last_name"`
+	}
 
 	token, _ := util.GenerateToken(user.ID)
-	return &LoginResponse{Token: token, FirstName: user.FirstName, LastName: user.LastName}, nil
+	return &LoginResponse{Token: token, User: userValue{FirstName: user.FirstName, LastName: user.LastName} }, nil
 }
 
 func (s *service) RegisterUser(email, password string) error {
