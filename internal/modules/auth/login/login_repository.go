@@ -33,18 +33,18 @@ func (r *repository) Register(req RegisterRequest) error {
 	return r.db.Create(&user).Error
 }
 
-func (r *repository) Login(req LoginRequest) (User, error) {
-    var user User
-    err := r.db.Where("email = ?", req.Email).First(&user).Error
-    return user, err
-}
-
-
 // func (r *repository) Login(req LoginRequest) (User, error) {
-// 	var user User
-// 	err := r.db.Where("email = ? AND password = ?", req.Email, req.Password).First(&user).Error
-// 	return user, err
+//     var user User
+//     err := r.db.Where("email = ?", req.Email).First(&user).Error
+//     return user, err
 // }
+
+
+func (r *repository) Login(req LoginRequest) (User, error) {
+	var user User
+	err := r.db.Where("email = ? AND password = ?", req.Email, req.Password).First(&user).Error
+	return user, err
+}
 
 func (r *repository) GetByID(id uint) (User, error) {
 	var user User
