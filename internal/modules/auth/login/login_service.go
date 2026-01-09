@@ -35,8 +35,22 @@ func (s *service) Register(req RegisterRequest) error {
 }
 
 func (s *service) Login(req LoginRequest) (User, error) {
-	return s.repo.Login(req)
+    user, err := s.repo.Login(req)
+    if err != nil {
+        return user, errors.New("invalid email or password")
+    }
+
+    // cek password hash
+    if !util.CheckPasswordHash(req.Password, user.Password) {
+        return user, errors.New("invalid email or password")
+    }
+
+    return user, nil
 }
+
+// func (s *service) Login(req LoginRequest) (User, error) {
+// 	return s.repo.Login(req)
+// }
 
 // func (s *service) RegisterUser(email, password string) error {
 // 	user := User{
