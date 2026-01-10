@@ -11,6 +11,7 @@ func InitRoutes(router fiber.Router, db *gorm.DB) {
 	ctrl := NewLoginController(svc)
 
 	auth := router.Group("/auth")
+
 	auth.Post("/login", ctrl.Login)
 	auth.Post("/register-test", ctrl.RegisterTest) // Endpoint sementara
 }
