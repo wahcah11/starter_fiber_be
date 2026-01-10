@@ -4,7 +4,7 @@ import (
 	"starter-wahcah-be/config"
 	"starter-wahcah-be/internal/modules/auth/login"
 	"starter-wahcah-be/internal/router"
-
+	"github.com/joho/godotenv"
 	"github.com/gofiber/fiber/v2"
 	
 )
@@ -27,4 +27,6 @@ func main() {
 
 	// 5. Start (Port 8080 sesuai expose dockerfile)
 	app.Listen(":8080")
+
+	godotenv.Load()
 }
