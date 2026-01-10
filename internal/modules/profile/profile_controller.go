@@ -2,7 +2,6 @@ package profile
 
 import (
 	"github.com/gofiber/fiber/v2"
-	//"strconv"
 )
 
 type Controller struct {
@@ -18,7 +17,6 @@ func (c *Controller) GetProfile(ctx *fiber.Ctx) error {
 
 	var id uint
 
-	// Konversi tipe (JWT biasanya float64)
 	if v, ok := userID.(float64); ok {
 		id = uint(v)
 	}

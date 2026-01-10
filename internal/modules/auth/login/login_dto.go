@@ -9,7 +9,6 @@ type LoginResponse struct {
 	Token     string `json:"token"`
 	FirstName string `json:"firstname"`
 	LastName  string `json:"lastname"`
-	//Email     string `json:"email"`
 }
 
 type RegisterRequest struct {

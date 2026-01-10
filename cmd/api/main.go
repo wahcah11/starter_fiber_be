@@ -13,9 +13,6 @@ func main() {
 	godotenv.Load()
 	// 1. Konek DB
 	db := config.NewDatabase()
-//	if db == nil {
-//	log.Println("Running without database connection")
-//}
 
 	// 2. Auto Migrate (Hanya di dev environment)
 	db.AutoMigrate(&login.User{})

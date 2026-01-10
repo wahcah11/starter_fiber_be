@@ -41,7 +41,6 @@ func (s *service) Register(req RegisterRequest) error {
     }
 
     return s.repo.CreateUser(&user)
-	//return s.repo.Register(req)
 }
 
 func (s *service) Login(req LoginRequest) (User, error) {
@@ -58,26 +57,12 @@ func (s *service) Login(req LoginRequest) (User, error) {
     return user, nil
 }
 
-// func (s *service) Login(req LoginRequest) (User, error) {
-// 	return s.repo.Login(req)
-// }
-
-// func (s *service) RegisterUser(email, password string) error {
-// 	user := User{
-// 		Email:    email,
-// 		Password: password,
-// 	}
-// 	return s.repo.CreateUser(&user)
-// }
 
 func (s *service) GetByID(id uint) (User, error) {
 	return s.repo.GetByID(id)
 }
 
 
-// func NewLoginService(repo Repository) Service {
-// 	return &service{repo}
-// }
 
 func (s *service) Authenticate(req LoginRequest) (*LoginResponse, error) {
 	user, err := s.repo.FindByEmail(req.Email)
