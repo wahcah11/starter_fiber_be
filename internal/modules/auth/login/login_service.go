@@ -31,7 +31,17 @@ func NewLoginService(repo Repository) Service {
 }
 
 func (s *service) Register(req RegisterRequest) error {
-	return s.repo.Register(req)
+	hashed, _ := util.HashPassword(req.Password)
+
+    user := User{
+        FirstName: req.FirstName,
+        LastName:  req.LastName,
+        Email:     req.Email,
+        Password:  hashed,
+    }
+
+    return s.repo.CreateUser(&user)
+	//return s.repo.Register(req)
 }
 
 func (s *service) Login(req LoginRequest) (User, error) {
