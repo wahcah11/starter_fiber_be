@@ -23,5 +23,5 @@ func InitRoutes(router fiber.Router, db *gorm.DB) {
 	// Route: /api/auth/profil
 	r := router.Group("/auth", middleware.AuthMiddleware)
 
-	r.Get("/profil", profilController.GetProfile)
+	r.Get("/profile", profilController.GetProfile)
 }
