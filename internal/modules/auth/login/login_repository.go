@@ -42,7 +42,8 @@ func (r *repository) Register(req RegisterRequest) error {
 
 func (r *repository) Login(req LoginRequest) (User, error) {
 	var user User
-	err := r.db.Where("email = ? AND password = ?", req.Email, req.Password).First(&user).Error
+	err := r.db.Where("email = ?", req.Email).First(&user).Error
+	//err := r.db.Where("email = ? AND password = ?", req.Email, req.Password).First(&user).Error
 	return user, err
 }
 
