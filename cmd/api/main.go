@@ -1,14 +1,15 @@
 package main
 
 import (
+	"github.com/gofiber/fiber/v2"
+	"github.com/joho/godotenv"
 	"starter-wahcah-be/config"
 	"starter-wahcah-be/internal/modules/auth/login"
 	"starter-wahcah-be/internal/router"
-
-	"github.com/gofiber/fiber/v2"
 )
 
 func main() {
+	godotenv.Load()
 	// 1. Konek DB
 	db := config.NewDatabase()
 
@@ -23,4 +24,5 @@ func main() {
 
 	// 5. Start (Port 8080 sesuai expose dockerfile)
 	app.Listen(":8080")
+
 }
