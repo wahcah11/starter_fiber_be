@@ -3,13 +3,23 @@ package router
 import (
 	"starter-wahcah-be/internal/modules/auth/login"
 	//"starter-wahcah-be/internal/modules/profil"
-	"starter-wahcah-be/internal/middleware"
+	//"starter-wahcah-be/internal/middleware"
 	"starter-wahcah-be/internal/modules/profile"
 	"github.com/gofiber/fiber/v2"
 	//"github.com/gofiber/fiber/v2/middleware/logger"
 	"gorm.io/gorm"
 )
 
+func SetupRoutes(app *fiber.App, db *gorm.DB) {
+
+	api := app.Group("/api")
+
+	// === AUTH MODULE ===
+	login.InitRoutes(api, db)
+
+	// === PROFILE MODULE ===
+	profile.InitRoutes(api, db)
+}
 // func SetupRoutes(app *fiber.App, db *gorm.DB) {
 
 // 	app.Use(logger.New())
@@ -29,30 +39,30 @@ import (
 // 	profile.Get("/me", profileController.GetProfile)
 // }
 
-func SetupRoutes(app *fiber.App, db *gorm.DB) {
+// func SetupRoutes(app *fiber.App, db *gorm.DB) {
 
-	// --- LOGIN MODULE ---
-	loginRepo := login.NewRepository(db)
-	loginSvc := login.NewLoginService(loginRepo)
-	loginCtrl := login.NewController(loginSvc)
+// 	// --- LOGIN MODULE ---
+// 	loginRepo := login.NewRepository(db)
+// 	loginSvc := login.NewLoginService(loginRepo)
+// 	loginCtrl := login.NewController(loginSvc)
 
-	// --- PROFILE MODULE ---
-	profileRepo := profile.NewProfileRepository(db)
-	profileSvc := profile.NewProfileService(profileRepo)
-	profileCtrl := profile.NewProfileController(profileSvc)
+// 	// --- PROFILE MODULE ---
+// 	profileRepo := profile.NewProfileRepository(db)
+// 	profileSvc := profile.NewProfileService(profileRepo)
+// 	profileCtrl := profile.NewProfileController(profileSvc)
 
-	api := app.Group("/api")
+// 	api := app.Group("/api")
 
-	// Group untuk /api/auth
-	auth := api.Group("/auth")
+// 	// Group untuk /api/auth
+// 	auth := api.Group("/auth")
 
-	// Public routes (tanpa token)
-	auth.Post("/register-test", loginCtrl.RegisterTest)
-	auth.Post("/login", loginCtrl.Login)
+// 	// Public routes (tanpa token)
+// 	auth.Post("/register-test", loginCtrl.RegisterTest)
+// 	auth.Post("/login", loginCtrl.Login)
 
-	// Protected route (harus pakai token)
-	auth.Get("/profile", middleware.AuthMiddleware, profileCtrl.GetProfile)
-}
+// 	// Protected route (harus pakai token)
+// 	auth.Get("/profile", middleware.AuthMiddleware, profileCtrl.GetProfile)
+// }
 
 // func SetupRoutes(app *fiber.App, db *gorm.DB) {
 

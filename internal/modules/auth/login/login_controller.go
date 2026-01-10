@@ -82,6 +82,27 @@ func (c *Controller) Login(ctx *fiber.Ctx) error {
 	
 }
 
+func (c *Controller) Profile(ctx *fiber.Ctx) error {
+	userID := ctx.Locals("user_id")
+	if userID == nil {
+		return ctx.Status(400).JSON(fiber.Map{"error": "user_id missing"})
+	}
+
+	id := uint(userID.(float64))
+
+	user, err := c.service.GetByID(id)
+	if err != nil {
+		return ctx.Status(404).JSON(fiber.Map{"error": "User not found"})
+	}
+
+	return ctx.JSON(fiber.Map{
+		"first_name": user.FirstName,
+		"last_name":  user.LastName,
+		"email":      user.Email,
+	})
+}
+
+
 // func (c *Controller) Login(ctx *fiber.Ctx) error {
 // 	var req LoginRequest
 // 	if err := ctx.BodyParser(&req); err != nil {
