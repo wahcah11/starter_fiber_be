@@ -31,24 +31,49 @@ import (
 
 func SetupRoutes(app *fiber.App, db *gorm.DB) {
 
-	repo := login.NewRepository(db)
-	svc := login.NewLoginService(repo)
- 	controller := login.NewController(svc)
-	// repo := login.NewRepository(db)
-	// controller := login.NewController(repo)
+	// --- LOGIN MODULE ---
+	loginRepo := login.NewRepository(db)
+	loginSvc := login.NewLoginService(loginRepo)
+	loginCtrl := login.NewController(loginSvc)
 
-	api := app.Group("/api/auth")
+	// --- PROFILE MODULE ---
+	profileRepo := profile.NewProfileRepository(db)
+	profileSvc := profile.NewProfileService(profileRepo)
+	profileCtrl := profile.NewProfileController(profileSvc)
 
-	api.Post("/register-test", controller.RegisterTest)
-	api.Post("/login", controller.Login)
+	api := app.Group("/api")
 
-	profileRepo := profile.NewRepository(db)
-	profileService := profile.NewService(profileRepo)
-	profileController := profile.NewController(profileService)
-	profile := api.Group("/profil", middleware.AuthMiddleware)
-	profile.Get("/me", profileController.GetProfile)
-	//api.Get("/profil", middleware.AuthMiddleware, controller.Profil)
+	// Group untuk /api/auth
+	auth := api.Group("/auth")
+
+	// Public routes (tanpa token)
+	auth.Post("/register-test", loginCtrl.RegisterTest)
+	auth.Post("/login", loginCtrl.Login)
+
+	// Protected route (harus pakai token)
+	auth.Get("/profile", middleware.AuthMiddleware, profileCtrl.GetProfile)
 }
+
+// func SetupRoutes(app *fiber.App, db *gorm.DB) {
+
+// 	repo := login.NewRepository(db)
+// 	svc := login.NewLoginService(repo)
+//  	controller := login.NewController(svc)
+// 	// repo := login.NewRepository(db)
+// 	// controller := login.NewController(repo)
+
+// 	api := app.Group("/api/auth")
+
+// 	api.Post("/register-test", controller.RegisterTest)
+// 	api.Post("/login", controller.Login)
+
+// 	profileRepo := profile.NewProfileRepository(db)
+// 	profileService := profile.NewProfileService(profileRepo)
+// 	profileController := profile.NewProfileController(profileService)
+// 	profile := api.Group("/profil", middleware.AuthMiddleware)
+// 	profile.Get("/me", profileController.GetProfile)
+// 	//api.Get("/profil", middleware.AuthMiddleware, controller.Profil)
+// }
 
 // func SetupRoutes(app *fiber.App, db *gorm.DB) {
 // 	repo := login.NewRepository(db)
