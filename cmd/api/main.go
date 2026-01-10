@@ -10,6 +10,7 @@ import (
 )
 
 func main() {
+	godotenv.Load()
 	// 1. Konek DB
 	db := config.NewDatabase()
 //	if db == nil {
@@ -28,5 +29,5 @@ func main() {
 	// 5. Start (Port 8080 sesuai expose dockerfile)
 	app.Listen(":8080")
 
-	godotenv.Load()
+	
 }
