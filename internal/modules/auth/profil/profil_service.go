@@ -24,7 +24,7 @@ func (s *service) GetProfile(userID uint) (*ProfileResponse, error) {
 	}
 	fullName := user.FirstName + " " + user.LastName
 	return &ProfileResponse{
-		Name:  fullName,
+		FullName:  fullName,
 		Email: user.Email,
 	}, nil
 }
