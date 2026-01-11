@@ -2,6 +2,7 @@ package router
 
 import (
 	"starter-wahcah-be/internal/modules/auth/login"
+	"starter-wahcah-be/internal/modules/auth/profile"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -15,4 +16,5 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 
 	// Panggil Resepsionis Login
 	login.InitRoutes(api, db)
+	profile.InitRoutes(api, db) // ✅ WAJIB
 }
