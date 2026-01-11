@@ -34,8 +34,18 @@ func (c *Controller) Login(ctx *fiber.Ctx) error {
 
 // Endpoint tambahan buat bikin user pertama kali (biar bisa tes login)
 func (c *Controller) RegisterTest(ctx *fiber.Ctx) error {
-	var req LoginRequest
-	ctx.BodyParser(&req)
-	c.service.RegisterUser(req.Email, req.Password)
+	var req RegisterRequest
+	if err := ctx.BodyParser(&req); err != nil {
+		return ctx.Status(400).JSON(fiber.Map{"error": "Invalid JSON"})
+	}
+
+	if errs := util.ValidateStruct(req); errs != nil {
+		return ctx.Status(400).JSON(fiber.Map{"validation": errs})
+	}
+
+	if err := c.service.RegisterUser(req); err != nil {
+		return ctx.Status(500).JSON(fiber.Map{"error": err.Error()})
+	}
+
 	return ctx.JSON(fiber.Map{"message": "User created"})
 }

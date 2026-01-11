@@ -1,4 +1,3 @@
-
 # Build dockerfile
 ```bash
 podman build -t my-go-starter-img -f .devcontainer/Dockerfile .
