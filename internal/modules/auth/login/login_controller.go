@@ -34,8 +34,24 @@ func (c *Controller) Login(ctx *fiber.Ctx) error {
 
 // Endpoint tambahan buat bikin user pertama kali (biar bisa tes login)
 func (c *Controller) RegisterTest(ctx *fiber.Ctx) error {
-	var req LoginRequest
-	ctx.BodyParser(&req)
-	c.service.RegisterUser(req.Email, req.Password)
-	return ctx.JSON(fiber.Map{"message": "User created"})
+	var req RegisterRequest // Gunakan RegisterRequest, bukan LoginRequest
+	if err := ctx.BodyParser(&req); err != nil {
+		return ctx.Status(400).JSON(fiber.Map{"error": "Invalid JSON"})
+	}
+
+	// Validasi request untuk registrasi
+	if errs := util.ValidateStruct(req); errs != nil {
+		return ctx.Status(400).JSON(fiber.Map{"validation": errs})
+	}
+
+	// Mendaftarkan pengguna baru
+	err := c.service.RegisterUser(req) // Gunakan RegisterRequest pada service
+	if err != nil {
+		return ctx.Status(500).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	// Hanya mengirimkan pesan sukses tanpa nama lengkap
+	return ctx.JSON(fiber.Map{
+		"message": "User created successfully", // Response hanya berisi pesan sukses
+	})
 }
