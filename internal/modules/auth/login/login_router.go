@@ -8,7 +8,7 @@ import (
 func InitRoutes(router fiber.Router, db *gorm.DB) {
 	repo := NewLoginRepository(db)
 	svc := NewLoginService(repo)
-	ctrl := NewLoginController(svc)
+	ctrl := NewLoginController(svc, db)
 
 	auth := router.Group("/auth")
 	auth.Post("/login", ctrl.Login)
