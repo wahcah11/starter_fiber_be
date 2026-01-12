@@ -5,15 +5,6 @@ import (
 	"starter-wahcah-be/internal/util"
 )
 
-// type Service interface {
-// 	Authenticate(req LoginRequest) (*LoginResponse, error)
-// 	RegisterUser(email, password string) error // Helper buat bikin user
-// }
-
-// type service struct {
-// 	repo Repository
-// }
-
 type Service interface {
 	Register(req RegisterRequest) error
 	Login(req LoginRequest) (User, error)
