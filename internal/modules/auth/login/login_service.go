@@ -7,7 +7,8 @@ import (
 
 type Service interface {
 	Authenticate(req LoginRequest) (*LoginResponse, error)
-	RegisterUser(email, password string) error // Helper buat bikin user
+	RegisterUser(req LoginRequest) error
+ // Helper buat bikin user
 }
 
 type service struct {
@@ -29,11 +30,23 @@ func (s *service) Authenticate(req LoginRequest) (*LoginResponse, error) {
 	}
 
 	token, _ := util.GenerateToken(user.ID)
-	return &LoginResponse{Token: token}, nil
+	return &LoginResponse{
+		Token:     token,
+		Firstname: user.Firstname,
+		Lastname:  user.Lastname,
+	}, nil
 }
 
-func (s *service) RegisterUser(email, password string) error {
-	hashed, _ := util.HashPassword(password)
-	user := User{Email: email, Password: hashed}
+func (s *service) RegisterUser(req LoginRequest) error {
+	hashed, _ := util.HashPassword(req.Password)
+
+	user := User{
+		Email:     req.Email,
+		Password:  hashed,
+		Firstname: req.Firstname,
+		Lastname:  req.Lastname,
+	}
+
 	return s.repo.CreateUser(&user)
 }
+

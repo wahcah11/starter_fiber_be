@@ -4,7 +4,9 @@ import "gorm.io/gorm"
 
 type Repository interface {
 	FindByEmail(email string) (*User, error)
-	CreateUser(user *User) error // Tambahan untuk seeding/register manual
+	CreateUser(user *User) error 
+	FindByID(id uint) (*User, error)
+// Tambahan untuk seeding/register manual
 }
 
 type repository struct {
@@ -18,6 +20,11 @@ func NewLoginRepository(db *gorm.DB) Repository {
 func (r *repository) FindByEmail(email string) (*User, error) {
 	var user User
 	err := r.db.Where("email = ?", email).First(&user).Error
+	return &user, err
+}
+func (r *repository) FindByID(id uint) (*User, error) {
+	var user User
+	err := r.db.First(&user, id).Error
 	return &user, err
 }
 
