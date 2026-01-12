@@ -6,11 +6,13 @@ import (
 )
 
 func InitRoutes(router fiber.Router, db *gorm.DB) {
-	repo := NewLoginRepository(db)
+	repo := NewRepository(db)
 	svc := NewLoginService(repo)
-	ctrl := NewLoginController(svc)
+	ctrl := NewController(svc)
 
 	auth := router.Group("/auth")
 	auth.Post("/login", ctrl.Login)
 	auth.Post("/register-test", ctrl.RegisterTest) // Endpoint sementara
+
+
 }

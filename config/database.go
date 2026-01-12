@@ -23,7 +23,7 @@ func NewDatabase() *gorm.DB {
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Fatal("Gagal koneksi ke Database:", err)
+		log.Println("Database belum tersedia, server tetap berjalan:", err)
 	}
 
 	return db
