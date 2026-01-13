@@ -5,14 +5,17 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	
+    "starter-wahcah-be/internal/modules/auth/profile"
 	"gorm.io/gorm"
 )
 
 func SetupRoutes(app *fiber.App, db *gorm.DB) {
-	app.Use(logger.New())
+    app.Use(logger.New())
 
-	api := app.Group("/api")
+    api := app.Group("/api")
 
-	// Panggil Resepsionis Login
-	login.InitRoutes(api, db)
+    login.InitRoutes(api, db)
+    profile.InitRoutes(api, db)
 }
+

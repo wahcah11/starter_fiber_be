@@ -12,11 +12,11 @@ go mod init starter-wahcah-be
 ```bash
 go get github.com/gofiber/fiber/v2
 go get gorm.io/gorm
-go get gorm.io/driver/mysql             # Driver MySQL (Sesuai container Anda)
-go get golang.org/x/crypto/bcrypt       # Untuk Hash Password
-go get github.com/golang-jwt/jwt/v5     # Untuk Token
-go get github.com/joho/godotenv         # Untuk .env
-go get github.com/go-playground/validator/v10 # Untuk Validasi Input
+go get gorm.io/driver/mysql            
+go get golang.org/x/crypto/bcrypt      
+go get github.com/golang-jwt/jwt/v5     
+go get github.com/joho/godotenv         
+go get github.com/go-playground/validator/v10 
 ```
 
 # 3. Rapikan

@@ -18,9 +18,16 @@ func main() {
 	// 3. Init App
 	app := fiber.New()
 
+
+	app.Get("/", Hello)
 	// 4. Setup Routes
 	router.SetupRoutes(app, db)
 
 	// 5. Start (Port 8080 sesuai expose dockerfile)
 	app.Listen(":8080")
+}
+
+
+func Hello(ctx *fiber.Ctx) error {
+	return ctx.Status(200).JSON("Back ready cuy")
 }

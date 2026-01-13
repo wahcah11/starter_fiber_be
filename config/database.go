@@ -25,6 +25,7 @@ func NewDatabase() *gorm.DB {
 	if err != nil {
 		log.Fatal("Gagal koneksi ke Database:", err)
 	}
+	log.Print("berhasil koneksi")
 
 	return db
 }

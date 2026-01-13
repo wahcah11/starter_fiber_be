@@ -4,6 +4,7 @@ import "gorm.io/gorm"
 
 type Repository interface {
 	FindByEmail(email string) (*User, error)
+	FindByID(id uint) (*User, error)
 	CreateUser(user *User) error // Tambahan untuk seeding/register manual
 }
 
@@ -23,4 +24,9 @@ func (r *repository) FindByEmail(email string) (*User, error) {
 
 func (r *repository) CreateUser(user *User) error {
 	return r.db.Create(user).Error
+}
+func (r *repository) FindByID(id uint) (*User, error) {
+    var user User
+    err := r.db.First(&user, id).Error
+    return &user, err
 }
