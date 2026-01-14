@@ -1,19 +1,19 @@
 package profile
 
-import "starter-wahcah-be/internal/modules/auth/login"
+// import "starter-wahcah-be/internal/modules/auth/login"
 
 type Service interface {
-	GetByID(id uint) (login.User, error)
+	GetByID(id uint) (User, error)
 }
 
 type service struct {
-	loginRepo login.Repository
+	repo Repository
 }
 
-func NewProfileService(repo login.Repository) Service {
-	return &service{loginRepo: repo}
+func NewProfileService(repo Repository) Service {
+	return &service{repo: repo}
 }
 
-func (s *service) GetByID(id uint) (login.User, error) {
-	return s.loginRepo.GetByID(id)
+func (s *service) GetByID(id uint) (User, error) {
+	return s.repo.GetByID(id)
 }

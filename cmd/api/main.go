@@ -2,14 +2,12 @@ package main
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/joho/godotenv"
 	"starter-wahcah-be/config"
 	"starter-wahcah-be/internal/modules/auth/login"
 	"starter-wahcah-be/internal/router"
 )
 
 func main() {
-	godotenv.Load()
 	// 1. Konek DB
 	db := config.NewDatabase()
 

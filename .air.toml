@@ -3,10 +3,10 @@ tmp_dir = "tmp"
 
 [build]
   # PENTING: Arahkan ke cmd/api/main.go, bukan titik (.)
-  cmd = "go build -o ./tmp/main.exe ./cmd/api/main.go"
+  cmd = "go build -o ./tmp/main ./cmd/api/main.go"
   
   # Lokasi file binary hasil build
-  bin = "./tmp/main.exe"
+  bin = "./tmp/main"
   
   # Nama file binary (opsional)
   full_bin = ""

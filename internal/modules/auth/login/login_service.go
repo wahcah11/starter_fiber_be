@@ -5,18 +5,18 @@ import (
 	"starter-wahcah-be/internal/util"
 )
 
-type Service interface {
-	Register(req RegisterRequest) error
-	Login(req LoginRequest) (User, error)
-	RegisterUser(email, password string) error
-	GetByID(id uint) (User, error)
-}
+// type Service interface {
+// 	Register(req RegisterRequest) error
+// 	Login(req LoginRequest) (User, error)
+// 	RegisterUser(email, password string) error
+// 	GetByID(id uint) (User, error)
+// }
 
 type service struct {
 	repo Repository
 }
 
-func NewLoginService(repo Repository) Service {
+func NewLoginService(repo Repository) *service {
 	return &service{repo}
 }
 

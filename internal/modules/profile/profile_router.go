@@ -2,7 +2,7 @@ package profile
 
 import (
 	"starter-wahcah-be/internal/middleware"
-	"starter-wahcah-be/internal/modules/auth/login"
+	// "starter-wahcah-be/internal/modules/auth/login"
 
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
@@ -10,10 +10,10 @@ import (
 
 func InitRoutes(router fiber.Router, db *gorm.DB) {
 
-	loginRepo := login.NewRepository(db)
-	profilService := NewProfileService(loginRepo)
-	profilController := NewProfileController(profilService)
+	profileRepo := NewProfileRepository(db)
+	profileService := NewProfileService(profileRepo)
+	profileController := NewProfileController(profileService)
 
-	r := router.Group("/auth", middleware.AuthMiddleware)
-	r.Get("/profile", profilController.GetProfile)
+	r := router.Group("/auth", middleware.Protected())
+	r.Get("/profile", profileController.GetProfile)
 }
