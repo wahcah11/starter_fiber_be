@@ -2,7 +2,7 @@ package router
 
 import (
 	"starter-wahcah-be/internal/modules/auth/login"
-	"starter-wahcah-be/internal/modules/profile"
+	"starter-wahcah-be/internal/modules/auth/profile"
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )

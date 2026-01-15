@@ -4,13 +4,13 @@ import (
 	"starter-wahcah-be/config"
 	"starter-wahcah-be/internal/modules/auth/login"
 	"starter-wahcah-be/internal/router"
-	"github.com/joho/godotenv"
+	//"github.com/joho/godotenv"
 	"github.com/gofiber/fiber/v2"
 	
 )
 
 func main() {
-	godotenv.Load()
+	//godotenv.Load()
 	// 1. Konek DB
 	db := config.NewDatabase()
 

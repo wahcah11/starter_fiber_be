@@ -2,16 +2,16 @@ package login
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/golang-jwt/jwt/v5"
-	"os"
-	"time"
+	//"github.com/golang-jwt/jwt/v5"
+	//"os"
+	//"time"
 )
 
 type Controller struct {
 	service Service
 }
 
-func NewController(service Service) *Controller {
+func NewLoginController(service Service) *Controller {
 	return &Controller{service}
 }
 
@@ -40,46 +40,55 @@ func (c *Controller) Login(ctx *fiber.Ctx) error {
 		return ctx.Status(400).JSON(fiber.Map{"error": "Invalid JSON"})
 	}
 
-	user, err := c.service.Login(req)
-	if err != nil{
-		return ctx.Status(401).JSON(fiber.Map{"error": "invalid credentials"})
-	}
+	res, err := c.service.Authenticate(req)
+    if err != nil {
+        return ctx.Status(401).JSON(fiber.Map{"error": "invalid credentials"})
+    }
 
-	claims := jwt.MapClaims{
-		"user_id": user.ID,
-		"exp": time.Now().Add(time.Hour * 24).Unix(),
-	}
+    return ctx.JSON(res)
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	secret := os.Getenv("JWT_SECRET")
-	t, _ := token.SignedString([]byte(secret))
 
-	return ctx.JSON(LoginResponse{
-		Token: t,
-		FirstName: user.FirstName,
-		LastName: user.LastName,
-	})
+
+	// user, err := c.service.Authenticate(req)
+	// if err != nil{
+	// 	return ctx.Status(401).JSON(fiber.Map{"error": "invalid credentials"})
+	// }
+
+	// claims := jwt.MapClaims{
+	// 	"user_id": user.ID,
+	// 	"exp": time.Now().Add(time.Hour * 24).Unix(),
+	// }
+
+	// token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	// secret := os.Getenv("JWT_SECRET")
+	// t, _ := token.SignedString([]byte(secret))
+
+	// return ctx.JSON(LoginResponse{
+	// 	Token: t,
+	// 	FirstName: user.FirstName,
+	// 	LastName: user.LastName,
+	// })
 	
 }
 
-func (c *Controller) Profile(ctx *fiber.Ctx) error {
-	userID := ctx.Locals("user_id")
-	if userID == nil {
-		return ctx.Status(400).JSON(fiber.Map{"error": "user_id missing"})
-	}
+// func (c *Controller) Profile(ctx *fiber.Ctx) error {
+// 	userID := ctx.Locals("user_id")
+// 	if userID == nil {
+// 		return ctx.Status(400).JSON(fiber.Map{"error": "user_id missing"})
+// 	}
 
-	id := uint(userID.(float64))
+// 	id := uint(userID.(float64))
 
-	user, err := c.service.GetByID(id)
-	if err != nil {
-		return ctx.Status(404).JSON(fiber.Map{"error": "User not found"})
-	}
+// 	user, err := c.service.GetByID(id)
+// 	if err != nil {
+// 		return ctx.Status(404).JSON(fiber.Map{"error": "User not found"})
+// 	}
 
-	return ctx.JSON(fiber.Map{
-		"first_name": user.FirstName,
-		"last_name":  user.LastName,
-		"email":      user.Email,
-	})
-}
+// 	return ctx.JSON(fiber.Map{
+// 		"first_name": user.FirstName,
+// 		"last_name":  user.LastName,
+// 		"email":      user.Email,
+// 	})
+// }
 
 

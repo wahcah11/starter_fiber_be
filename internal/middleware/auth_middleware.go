@@ -8,24 +8,49 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func AuthMiddleware(ctx *fiber.Ctx) error {
-    authHeader := ctx.Get("Authorization")
-    if authHeader == "" {
-        return ctx.Status(401).JSON(fiber.Map{"error": "missing token"})
-    }
+func Protected() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		authHeader := c.Get("Authorization")
+		if authHeader == "" {
+			return c.Status(401).JSON(fiber.Map{"error": "Unauthorized"})
+		}
 
-    tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
+		tokenString := strings.Replace(authHeader, "Bearer ", "", 1)
 
-    token, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
-        return []byte(os.Getenv("JWT_SECRET")), nil
-    })
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+			return []byte(os.Getenv("JWT_SECRET")), nil
+		})
 
-    if err != nil || !token.Valid {
-        return ctx.Status(401).JSON(fiber.Map{"error": "invalid token"})
-    }
+		if err != nil || !token.Valid {
+			return c.Status(401).JSON(fiber.Map{"error": "Invalid Token"})
+		}
 
-    claims := token.Claims.(jwt.MapClaims)
-    ctx.Locals("user_id", uint(claims["user_id"].(float64)))
+		claims := token.Claims.(jwt.MapClaims)
+		// Simpan user_id ke Locals agar bisa dipakai di Controller
+		c.Locals("user_id", uint(claims["user_id"].(float64)))
 
-    return ctx.Next()
+		return c.Next()
+	}
 }
+
+// func AuthMiddleware(ctx *fiber.Ctx) error {
+//     authHeader := ctx.Get("Authorization")
+//     if authHeader == "" {
+//         return ctx.Status(401).JSON(fiber.Map{"error": "missing token"})
+//     }
+
+//     tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
+
+//     token, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
+//         return []byte(os.Getenv("JWT_SECRET")), nil
+//     })
+
+//     if err != nil || !token.Valid {
+//         return ctx.Status(401).JSON(fiber.Map{"error": "invalid token"})
+//     }
+
+//     claims := token.Claims.(jwt.MapClaims)
+//     ctx.Locals("user_id", uint(claims["user_id"].(float64)))
+
+//     return ctx.Next()
+// }

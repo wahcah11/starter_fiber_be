@@ -10,11 +10,11 @@ import (
 
 func InitRoutes(router fiber.Router, db *gorm.DB) {
 
-	loginRepo := login.NewRepository(db)
+	loginRepo := login.NewLoginRepository(db)
 	profilService := NewProfileService(loginRepo)
 	profilController := NewProfileController(profilService)
 
 
-	r := router.Group("/auth", middleware.AuthMiddleware)
+	r := router.Group("/auth", middleware.Protected())
 	r.Get("/profile", profilController.GetProfile)
 }
