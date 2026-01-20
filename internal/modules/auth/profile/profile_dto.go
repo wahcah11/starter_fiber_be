@@ -1,7 +1,7 @@
 package profile
 
 type ProfileResponse struct {
-    Nama  string `json:"nama"`
+    Nama  string `json:"fullName"`
     Email string `json:"email"`
 }
 

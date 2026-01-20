@@ -1,16 +1,16 @@
 services:
   app:
     # HAPUS BAGIAN 'build:' (context & dockerfile)
-    # build: 
+    # build:
     #   context: .
     #   dockerfile: Dockerfile
-    
+
     # Gunakan nama image yang sama persis dengan yang kita build tadi
     image: my-go-starter-img
-    
+
     # Tambahkan ini agar Podman tidak mencoba download dari internet
     pull_policy: never
-    
+
     container_name: starter_app
     command: sleep infinity
     volumes:
@@ -19,7 +19,7 @@ services:
       - DB_HOST=db
       - DB_PORT=3306
       - DB_USER=starter_user
-      - DB_PASS=starter_pass
+      - DB_PASSWORD=starter_pass
       - DB_NAME=starter_db
       - APP_PORT=8080
     ports:

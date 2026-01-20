@@ -14,7 +14,10 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 
 	api := app.Group("/api")
 
-	// Panggil Resepsionis Login
-	login.InitRoutes(api, db)
-	profile.InitRoutes(api, db) // ✅ WAJIB
+	// ✅ gunakan nama constructor yang ada di login_repository.go
+	loginRepo := login.NewLoginRepository(db)
+
+	// ✅ inject repo yang sama
+	login.InitRoutes(api, loginRepo)
+	profile.InitRoutes(api, loginRepo)
 }
