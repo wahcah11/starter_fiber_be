@@ -2,7 +2,7 @@ package main
 
 import (
 	"starter-wahcah-be/config"
-	"starter-wahcah-be/internal/modules/auth/login"
+	"starter-wahcah-be/internal/models"
 	"starter-wahcah-be/internal/router"
 
 	"github.com/gofiber/fiber/v2"
@@ -13,7 +13,7 @@ func main() {
 	db := config.NewDatabase()
 
 	// 2. Auto Migrate (Hanya di dev environment)
-	db.AutoMigrate(&login.User{})
+	db.AutoMigrate(&models.User{})
 
 	// 3. Init App
 	app := fiber.New()

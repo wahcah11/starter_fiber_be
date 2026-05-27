@@ -1,10 +1,6 @@
 services:
   app:
-    # HAPUS BAGIAN 'build:' (context & dockerfile)
-    # build: 
-    #   context: .
-    #   dockerfile: Dockerfile
-    
+        
     # Gunakan nama image yang sama persis dengan yang kita build tadi
     image: my-go-starter-img
     

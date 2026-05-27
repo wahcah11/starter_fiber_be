@@ -1,10 +1,14 @@
 package login
 
-import "gorm.io/gorm"
+import (
+	"starter-wahcah-be/internal/models"
+
+	"gorm.io/gorm"
+)
 
 type Repository interface {
-	FindByEmail(email string) (*User, error)
-	CreateUser(user *User) error // Tambahan untuk seeding/register manual
+	FindByEmail(email string) (*models.User, error)
+	CreateUser(user *models.User) error // Tambahan untuk seeding/register manual
 }
 
 type repository struct {
@@ -15,12 +19,12 @@ func NewLoginRepository(db *gorm.DB) Repository {
 	return &repository{db}
 }
 
-func (r *repository) FindByEmail(email string) (*User, error) {
-	var user User
+func (r *repository) FindByEmail(email string) (*models.User, error) {
+	var user models.User
 	err := r.db.Where("email = ?", email).First(&user).Error
 	return &user, err
 }
 
-func (r *repository) CreateUser(user *User) error {
+func (r *repository) CreateUser(user *models.User) error {
 	return r.db.Create(user).Error
 }

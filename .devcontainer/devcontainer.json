@@ -17,6 +17,5 @@
     }
   },
 
-  // Pastikan user root agar tidak ada isu permission file saat generate folder nanti
   "remoteUser": "root"
 }

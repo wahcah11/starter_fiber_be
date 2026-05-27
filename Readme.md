@@ -16,7 +16,7 @@ go get gorm.io/driver/mysql             # Driver MySQL (Sesuai container Anda)
 go get golang.org/x/crypto/bcrypt       # Untuk Hash Password
 go get github.com/golang-jwt/jwt/v5     # Untuk Token
 go get github.com/joho/godotenv         # Untuk .env
-go get github.com/go-playground/validator/v10 # Untuk Validasi Input
+go get github.com/go-playground/validator/v10@v10.22.1 # Untuk Validasi Input
 ```
 
 # 3. Rapikan

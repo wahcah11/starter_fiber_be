@@ -1,13 +1,11 @@
-# Gunakan versi stable, misal 1.23
-FROM golang:1.25-alpine
-
-# Instal 'air'
-RUN go install github.com/air-verse/air@latest
+FROM golang:1.24-alpine
 
 WORKDIR /app
 
-# Instal git (penting untuk go mod tidy) dan tools dasar
 RUN apk add --no-cache git curl
 
-# Expose port
+RUN go install github.com/air-verse/air@v1.61.5 && \
+    go install golang.org/x/tools/gopls@v0.17.1 && \
+    go install golang.org/x/tools/cmd/goimports@v0.30.0
+
 EXPOSE 8080

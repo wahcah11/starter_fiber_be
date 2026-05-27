@@ -2,6 +2,7 @@ package login
 
 import (
 	"errors"
+	"starter-wahcah-be/internal/models"
 	"starter-wahcah-be/internal/util"
 )
 
@@ -34,6 +35,6 @@ func (s *service) Authenticate(req LoginRequest) (*LoginResponse, error) {
 
 func (s *service) RegisterUser(email, password string) error {
 	hashed, _ := util.HashPassword(password)
-	user := User{Email: email, Password: hashed}
+	user := models.User{Email: email, Password: hashed}
 	return s.repo.CreateUser(&user)
 }
