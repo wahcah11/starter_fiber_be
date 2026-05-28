@@ -8,7 +8,6 @@ import (
 
 type Repository interface {
 	FindByEmail(email string) (*models.User, error)
-	CreateUser(user *models.User) error // Tambahan untuk seeding/register manual
 }
 
 type repository struct {
@@ -23,8 +22,4 @@ func (r *repository) FindByEmail(email string) (*models.User, error) {
 	var user models.User
 	err := r.db.Where("email = ?", email).First(&user).Error
 	return &user, err
-}
-
-func (r *repository) CreateUser(user *models.User) error {
-	return r.db.Create(user).Error
 }

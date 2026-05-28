@@ -31,11 +31,3 @@ func (c *Controller) Login(ctx *fiber.Ctx) error {
 
 	return ctx.JSON(fiber.Map{"data": res})
 }
-
-// Endpoint tambahan buat bikin user pertama kali (biar bisa tes login)
-func (c *Controller) RegisterTest(ctx *fiber.Ctx) error {
-	var req LoginRequest
-	ctx.BodyParser(&req)
-	c.service.RegisterUser(req.Email, req.Password)
-	return ctx.JSON(fiber.Map{"message": "User created"})
-}

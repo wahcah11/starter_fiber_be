@@ -2,13 +2,11 @@ package login
 
 import (
 	"errors"
-	"starter-wahcah-be/internal/models"
 	"starter-wahcah-be/internal/util"
 )
 
 type Service interface {
 	Authenticate(req LoginRequest) (*LoginResponse, error)
-	RegisterUser(email, password string) error // Helper buat bikin user
 }
 
 type service struct {
@@ -31,10 +29,4 @@ func (s *service) Authenticate(req LoginRequest) (*LoginResponse, error) {
 
 	token, _ := util.GenerateToken(user.ID)
 	return &LoginResponse{Token: token}, nil
-}
-
-func (s *service) RegisterUser(email, password string) error {
-	hashed, _ := util.HashPassword(password)
-	user := models.User{Email: email, Password: hashed}
-	return s.repo.CreateUser(&user)
 }
