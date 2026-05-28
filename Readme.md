@@ -17,6 +17,8 @@ go get golang.org/x/crypto/bcrypt       # Untuk Hash Password
 go get github.com/golang-jwt/jwt/v5     # Untuk Token
 go get github.com/joho/godotenv         # Untuk .env
 go get github.com/go-playground/validator/v10@v10.22.1 # Untuk Validasi Input
+go get github.com/stretchr/testify
+go install github.com/vektra/mockery/v2@latest
 ```
 
 # 3. Rapikan
@@ -33,8 +35,7 @@ air
 # Test endpoint
 
 ```url
-POST http://localhost:9090/api/auth/register-test
-POST http://localhost:9090/api/auth/login
+POST http://localhost:9090/apiv1//auth/login
 ```
 
 request raw body :
