@@ -1,12 +1,7 @@
 services:
   app:
-        
-    # Gunakan nama image yang sama persis dengan yang kita build tadi
     image: my-go-starter-img
-    
-    # Tambahkan ini agar Podman tidak mencoba download dari internet
     pull_policy: never
-    
     container_name: starter_app
     command: sleep infinity
     volumes:
@@ -15,17 +10,22 @@ services:
       - DB_HOST=db
       - DB_PORT=3306
       - DB_USER=starter_user
-      - DB_PASS=starter_pass
+      - DB_PASSWORD=starter_pass        # ← fix: DB_PASS → DB_PASSWORD
       - DB_NAME=starter_db
       - APP_PORT=8080
+      - APP_ENV=development
+      - APP_NAME=starter-wahcah-be
+      - JWT_SECRET=change_this_secret_in_prod
+      - JWT_EXPIRES_IN=24h
+      - ALLOWED_ORIGINS=http://localhost:3000
     ports:
       - "9090:8080"
     depends_on:
-      - db
+      db:
+        condition: service_healthy    # ← tunggu DB benar-benar ready
     networks:
       - starter-network
 
-  # ... (Service db dan phpmyadmin biarkan sama, tidak perlu diubah)
   db:
     image: mysql:8.0
     container_name: starter_db
@@ -36,6 +36,11 @@ services:
       MYSQL_ROOT_PASSWORD: rootpassword
     volumes:
       - mysql_starter_data:/var/lib/mysql:Z
+    healthcheck:                        # ← tambah healthcheck agar app tidak konek sebelum DB ready
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "starter_user", "-pstarter_pass"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     networks:
       - starter-network
 
@@ -49,7 +54,8 @@ services:
       PMA_PORT: 3306
       MYSQL_ROOT_PASSWORD: rootpassword
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - starter-network
 
