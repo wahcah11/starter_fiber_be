@@ -14,6 +14,9 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	api := app.Group("/api")
 	v1 := api.Group("/v1")
 
-	// Panggil Resepsionis Login
+	// proteksi
+	// middleware.OptionalAuth() -> optional login atau tidak
+	// middleware.Protected() -> wajib login
+
 	login.InitRoutes(v1, db)
 }
