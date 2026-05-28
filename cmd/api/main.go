@@ -13,7 +13,10 @@ func main() {
 	db := config.NewDatabase()
 
 	// 2. Auto Migrate (Hanya di dev environment)
-	db.AutoMigrate(&models.User{})
+	db.AutoMigrate(&models.Role{},
+		&models.Permission{},
+		&models.User{},
+		&models.UserRole{})
 
 	// 3. Init App
 	app := fiber.New()
