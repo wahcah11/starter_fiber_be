@@ -12,7 +12,8 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	app.Use(logger.New())
 
 	api := app.Group("/api")
+	v1 := api.Group("/v1")
 
 	// Panggil Resepsionis Login
-	login.InitRoutes(api, db)
+	login.InitRoutes(v1, db)
 }
