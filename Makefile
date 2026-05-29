@@ -52,7 +52,19 @@ mock:
 
 ## Jalankan semua unit test
 test:
-	go test ./internal/modules/... -v
+	APP_ENV=test go test ./internal/... -v
+
+# Hanya unit test modules (tanpa integration)
+test-unit:
+	APP_ENV=test go test ./internal/modules/... -v
+
+# Hanya util dan middleware test
+test-util:
+	APP_ENV=test go test ./internal/util/... ./internal/middleware/... -v
+
+# Hanya integration test
+test-integration:
+	APP_ENV=test go test ./internal/modules/auth/login/... -v -run Integration
 
 ## Jalankan test dengan coverage report (HTML)
 test-coverage:

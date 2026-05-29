@@ -19,6 +19,9 @@ go get github.com/joho/godotenv         # Untuk .env
 go get github.com/go-playground/validator/v10@v10.22.1 # Untuk Validasi Input
 go get github.com/stretchr/testify
 go install github.com/vektra/mockery/v2@latest
+go get gorm.io/driver/sqlite
+go get github.com/mattn/go-sqlite3
+go mod tidy
 ```
 
 # 3. Rapikan

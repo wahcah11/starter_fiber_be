@@ -13,8 +13,12 @@ Dokumen ini menjelaskan aturan penulisan kode untuk setiap layer, mulai dari pen
 5. [Layer Service](#layer-service)
 6. [Layer Controller](#layer-controller)
 7. [Layer Router](#layer-router)
-8. [Unit Test](#unit-test)
-9. [Checklist Membuat Module Baru](#checklist-membuat-module-baru)
+8. [Unit Test per Layer](#unit-test-per-layer)
+9. [Test Util](#test-util)
+10. [Test Middleware](#test-middleware)
+11. [Integration Test Repository](#integration-test-repository)
+12. [Checklist Membuat Module Baru](#checklist-membuat-module-baru)
+13. [Perintah Penting](#perintah-penting)
 
 ---
 
@@ -24,21 +28,40 @@ Setiap module berada di dalam `internal/modules/{domain}/{feature}/`.
 
 ```
 internal/
-└── modules/
-    └── {domain}/               # contoh: auth, user, product
-        └── {feature}/          # contoh: login, register, profile
-            ├── {feature}_dto.go
-            ├── {feature}_repository.go
-            ├── {feature}_service.go
-            ├── {feature}_controller.go
-            ├── {feature}_router.go
-            ├── {feature}_repository_test.go
-            ├── {feature}_service_test.go
-            ├── {feature}_controller_test.go
-            ├── {feature}_router_test.go
-            └── mocks/
-                ├── Repository.go   ← auto-generated mockery
-                └── Service.go      ← auto-generated mockery
+├── middleware/
+│   ├── auth_middleware.go
+│   └── auth_middleware_test.go
+├── models/
+│   ├── migrate.go
+│   ├── user_model.go
+│   ├── role_model.go
+│   ├── permission_model.go
+│   └── user_role_model.go
+├── modules/
+│   └── {domain}/
+│       └── {feature}/
+│           ├── {feature}_dto.go
+│           ├── {feature}_repository.go
+│           ├── {feature}_service.go
+│           ├── {feature}_controller.go
+│           ├── {feature}_router.go
+│           ├── {feature}_repository_test.go
+│           ├── {feature}_service_test.go
+│           ├── {feature}_controller_test.go
+│           ├── {feature}_router_test.go
+│           ├── {feature}_repository_integration_test.go
+│           └── mocks/
+│               ├── Repository.go   <- auto-generated mockery
+│               └── Service.go      <- auto-generated mockery
+├── router/
+│   └── router.go
+└── util/
+    ├── jwt_util.go
+    ├── jwt_util_test.go
+    ├── password_util.go
+    ├── password_util_test.go
+    ├── validation_util.go
+    └── validation_util_test.go
 ```
 
 Contoh nyata untuk fitur login:
@@ -54,6 +77,7 @@ internal/modules/auth/login/
 ├── login_service_test.go
 ├── login_controller_test.go
 ├── login_router_test.go
+├── login_repository_integration_test.go
 └── mocks/
     ├── Repository.go
     └── Service.go
@@ -76,6 +100,7 @@ internal/modules/auth/login/
 | Test Service | `{feature}_service_test.go` | `login_service_test.go` |
 | Test Controller | `{feature}_controller_test.go` | `login_controller_test.go` |
 | Test Router | `{feature}_router_test.go` | `login_router_test.go` |
+| Integration Test | `{feature}_repository_integration_test.go` | `login_repository_integration_test.go` |
 
 ### Penamaan Package
 
@@ -84,6 +109,9 @@ Semua file dalam satu folder feature menggunakan package yang sama, yaitu nama f
 ```go
 // Semua file di folder login/ menggunakan:
 package login
+
+// Semua file test di folder login/ menggunakan:
+package login_test
 ```
 
 ### Penamaan Struct & Interface
@@ -161,17 +189,16 @@ Repository bertanggung jawab **hanya** untuk operasi database. Tidak boleh ada l
 ### Struktur Wajib
 
 ```go
-package {feature}
+package login
 
 import (
-    "{module}/internal/models"
+    "starter-wahcah-be/internal/models"
     "gorm.io/gorm"
 )
 
-// Repository mendefinisikan kontrak operasi database untuk {feature}
+// Repository mendefinisikan kontrak operasi database untuk login
 type Repository interface {
     FindByEmail(email string) (*models.User, error)
-    // tambahkan method lain di sini
 }
 
 // repository adalah implementasi dari interface Repository
@@ -179,8 +206,8 @@ type repository struct {
     db *gorm.DB
 }
 
-// New{Feature}Repository membuat instance repository baru
-func New{Feature}Repository(db *gorm.DB) Repository {
+// NewLoginRepository membuat instance repository baru
+func NewLoginRepository(db *gorm.DB) Repository {
     return &repository{db}
 }
 
@@ -220,17 +247,16 @@ Service bertanggung jawab untuk **logic bisnis**. Menggunakan repository melalui
 ### Struktur Wajib
 
 ```go
-package {feature}
+package login
 
 import (
     "errors"
-    "{module}/internal/util"
+    "starter-wahcah-be/internal/util"
 )
 
-// Service mendefinisikan kontrak logic bisnis untuk {feature}
+// Service mendefinisikan kontrak logic bisnis untuk login
 type Service interface {
     Authenticate(req LoginRequest) (*LoginResponse, error)
-    // tambahkan method lain di sini
 }
 
 // service adalah implementasi dari interface Service
@@ -238,8 +264,8 @@ type service struct {
     repo Repository
 }
 
-// New{Feature}Service membuat instance service baru
-func New{Feature}Service(repo Repository) Service {
+// NewLoginService membuat instance service baru
+func NewLoginService(repo Repository) Service {
     return &service{repo}
 }
 
@@ -285,32 +311,37 @@ Controller bertanggung jawab untuk **menangani HTTP request dan response**. Meng
 - Struct `Controller` ditulis dengan huruf besar (exported)
 - Struct `Controller` hanya boleh menyimpan `Service` (interface)
 - Selalu validasi request body sebelum diteruskan ke service
-- HTTP status code harus konsisten:
-  - `200` → sukses
-  - `400` → request tidak valid / validasi gagal
-  - `401` → tidak terautentikasi
-  - `403` → tidak punya akses
-  - `404` → data tidak ditemukan
-  - `500` → error server
+- HTTP status code harus konsisten (lihat tabel di bawah)
 - Response selalu dibungkus dengan key `data` untuk sukses, `error` untuk gagal
+
+### HTTP Status Code Standar
+
+| Status | Keterangan |
+|---|---|
+| `200` | Sukses |
+| `400` | Request tidak valid / validasi gagal |
+| `401` | Tidak terautentikasi |
+| `403` | Tidak punya akses |
+| `404` | Data tidak ditemukan |
+| `500` | Error server |
 
 ### Struktur Wajib
 
 ```go
-package {feature}
+package login
 
 import (
-    "{module}/internal/util"
+    "starter-wahcah-be/internal/util"
     "github.com/gofiber/fiber/v2"
 )
 
-// Controller menangani HTTP request untuk {feature}
+// Controller menangani HTTP request untuk login
 type Controller struct {
     service Service
 }
 
-// New{Feature}Controller membuat instance controller baru
-func New{Feature}Controller(service Service) *Controller {
+// NewLoginController membuat instance controller baru
+func NewLoginController(service Service) *Controller {
     return &Controller{service}
 }
 
@@ -345,7 +376,7 @@ func (c *Controller) Login(ctx *fiber.Ctx) error {
 { "data": { ... } }
 
 // Validasi gagal
-{ "validation": { "email": "email tidak valid", "password": "minimal 6 karakter" } }
+{ "validation": [{ "field": "Email", "tag": "email" }] }
 
 // Error
 { "error": "pesan error" }
@@ -365,7 +396,7 @@ func (c *Controller) Login(ctx *fiber.Ctx) error {
 
 ## Layer Router
 
-Router bertanggung jawab untuk **mendaftarkan route** dan **menyambungkan dependency** (repository → service → controller).
+Router bertanggung jawab untuk **mendaftarkan route** dan **menyambungkan dependency** (repository -> service -> controller).
 
 ### Aturan
 
@@ -378,29 +409,14 @@ Router bertanggung jawab untuk **mendaftarkan route** dan **menyambungkan depend
 ### Struktur Wajib
 
 ```go
-package {feature}
+package login
 
 import (
     "github.com/gofiber/fiber/v2"
     "gorm.io/gorm"
 )
 
-// InitRoutes mendaftarkan semua route untuk {feature}
-func InitRoutes(router fiber.Router, db *gorm.DB) {
-    // Inisialisasi dependency
-    repo := New{Feature}Repository(db)
-    svc  := New{Feature}Service(repo)
-    ctrl := New{Feature}Controller(svc)
-
-    // Grouping route
-    group := router.Group("/{domain}")
-    group.Post("/{endpoint}", ctrl.{Method})
-}
-```
-
-Contoh:
-
-```go
+// InitRoutes mendaftarkan semua route untuk login
 func InitRoutes(router fiber.Router, db *gorm.DB) {
     repo := NewLoginRepository(db)
     svc  := NewLoginService(repo)
@@ -421,18 +437,18 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
     v1  := api.Group("/v1")
 
     login.InitRoutes(v1, db)
-    register.InitRoutes(v1, db)  // ← tambahkan di sini
+    // register.InitRoutes(v1, db)  <- tambahkan module baru di sini
 }
 ```
 
 ---
 
-## Unit Test
+## Unit Test per Layer
 
 ### Aturan Umum Test
 
 - Nama file test: `{feature}_{layer}_test.go`
-- Package test: `{feature}_test` (bukan `{feature}`) — ini black-box testing
+- Package test: `{feature}_test` — black-box testing, bukan `{feature}`
 - Nama fungsi test: `Test{Layer}_{Method}_{Skenario}`
 - Setiap method wajib punya minimal **3 skenario**: sukses, input tidak valid, data tidak ditemukan
 - Mock di-generate otomatis dengan `make mock`, jangan ditulis manual
@@ -501,6 +517,8 @@ func TestRepository_FindByEmail_NotFound(t *testing.T) {
     mockRepo.AssertExpectations(t)
 }
 ```
+
+---
 
 ### Test Service
 
@@ -575,6 +593,8 @@ func TestService_Authenticate_WrongPassword(t *testing.T) {
 }
 ```
 
+---
+
 ### Test Controller
 
 Controller test memverifikasi **HTTP status dan response body** menggunakan `app.Test()` dari Fiber.
@@ -596,7 +616,6 @@ import (
     "github.com/stretchr/testify/assert"
 )
 
-// Helper: buat app fiber dengan controller yang di-inject mock service
 func setupControllerApp(svc login.Service) *fiber.App {
     app := fiber.New()
     ctrl := login.NewLoginController(svc)
@@ -639,7 +658,26 @@ func TestController_Login_ValidationError(t *testing.T) {
     res, _ := app.Test(req)
     assert.Equal(t, http.StatusBadRequest, res.StatusCode)
 }
+
+func TestController_Login_Unauthorized(t *testing.T) {
+    mockSvc := new(mocks.Service)
+    mockSvc.On("Authenticate", login.LoginRequest{
+        Email: "member@example.com", Password: "wrongpassword",
+    }).Return(nil, assert.AnError)
+
+    app := setupControllerApp(mockSvc)
+
+    body, _ := json.Marshal(fiber.Map{"email": "member@example.com", "password": "wrongpassword"})
+    req := httptest.NewRequest(http.MethodPost, "/auth/login", bytes.NewBuffer(body))
+    req.Header.Set("Content-Type", "application/json")
+
+    res, _ := app.Test(req)
+    assert.Equal(t, http.StatusUnauthorized, res.StatusCode)
+    mockSvc.AssertExpectations(t)
+}
 ```
+
+---
 
 ### Test Router
 
@@ -662,7 +700,6 @@ import (
     "github.com/stretchr/testify/assert"
 )
 
-// Helper: buat app fiber dengan route yang di-inject mock service
 func setupRouterApp(svc login.Service) *fiber.App {
     app := fiber.New()
     ctrl := login.NewLoginController(svc)
@@ -701,24 +738,516 @@ func TestRouter_GET_AuthLogin_MethodNotAllowed(t *testing.T) {
 
 ---
 
+## Test Util
+
+Util test memverifikasi **fungsi-fungsi helper** yang dipakai di seluruh layer.
+
+### password_util_test.go
+
+```go
+package util_test
+
+import (
+    "testing"
+
+    "starter-wahcah-be/internal/util"
+
+    "github.com/stretchr/testify/assert"
+)
+
+func TestHashPassword_Success(t *testing.T) {
+    hash, err := util.HashPassword("secret123")
+
+    assert.NoError(t, err)
+    assert.NotEmpty(t, hash)
+    assert.NotEqual(t, "secret123", hash)
+}
+
+func TestHashPassword_ProducesDifferentHashEachTime(t *testing.T) {
+    hash1, _ := util.HashPassword("secret123")
+    hash2, _ := util.HashPassword("secret123")
+
+    assert.NotEqual(t, hash1, hash2)
+}
+
+func TestCheckPasswordHash_CorrectPassword(t *testing.T) {
+    hash, _ := util.HashPassword("secret123")
+
+    result := util.CheckPasswordHash("secret123", hash)
+
+    assert.True(t, result)
+}
+
+func TestCheckPasswordHash_WrongPassword(t *testing.T) {
+    hash, _ := util.HashPassword("secret123")
+
+    result := util.CheckPasswordHash("wrongpassword", hash)
+
+    assert.False(t, result)
+}
+
+func TestCheckPasswordHash_EmptyPassword(t *testing.T) {
+    hash, _ := util.HashPassword("secret123")
+
+    result := util.CheckPasswordHash("", hash)
+
+    assert.False(t, result)
+}
+
+func TestCheckPasswordHash_EmptyHash(t *testing.T) {
+    result := util.CheckPasswordHash("secret123", "")
+
+    assert.False(t, result)
+}
+```
+
+### jwt_util_test.go
+
+```go
+package util_test
+
+import (
+    "os"
+    "testing"
+    "time"
+
+    "starter-wahcah-be/internal/util"
+
+    "github.com/golang-jwt/jwt/v5"
+    "github.com/stretchr/testify/assert"
+)
+
+func TestGenerateToken_Success(t *testing.T) {
+    os.Setenv("JWT_SECRET", "test-secret-key")
+
+    token, err := util.GenerateToken(1)
+
+    assert.NoError(t, err)
+    assert.NotEmpty(t, token)
+}
+
+func TestGenerateToken_DifferentUserID(t *testing.T) {
+    os.Setenv("JWT_SECRET", "test-secret-key")
+
+    token1, _ := util.GenerateToken(1)
+    token2, _ := util.GenerateToken(2)
+
+    assert.NotEqual(t, token1, token2)
+}
+
+func TestGenerateToken_ContainsCorrectUserID(t *testing.T) {
+    os.Setenv("JWT_SECRET", "test-secret-key")
+
+    token, err := util.GenerateToken(99)
+    assert.NoError(t, err)
+
+    parsed, parseErr := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
+        return []byte(os.Getenv("JWT_SECRET")), nil
+    })
+
+    assert.NoError(t, parseErr)
+    assert.True(t, parsed.Valid)
+
+    claims := parsed.Claims.(jwt.MapClaims)
+    assert.Equal(t, float64(99), claims["user_id"])
+}
+
+func TestGenerateToken_ContainsExpiry(t *testing.T) {
+    os.Setenv("JWT_SECRET", "test-secret-key")
+
+    token, _ := util.GenerateToken(1)
+
+    parsed, _ := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
+        return []byte(os.Getenv("JWT_SECRET")), nil
+    })
+
+    claims := parsed.Claims.(jwt.MapClaims)
+    exp := int64(claims["exp"].(float64))
+    assert.Greater(t, exp, time.Now().Unix())
+}
+
+func TestGenerateToken_InvalidWithWrongSecret(t *testing.T) {
+    os.Setenv("JWT_SECRET", "correct-secret")
+
+    token, _ := util.GenerateToken(1)
+
+    _, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
+        return []byte("wrong-secret"), nil
+    })
+
+    assert.Error(t, err)
+}
+```
+
+### validation_util_test.go
+
+```go
+package util_test
+
+import (
+    "testing"
+
+    "starter-wahcah-be/internal/util"
+
+    "github.com/stretchr/testify/assert"
+)
+
+type testLoginPayload struct {
+    Email    string `validate:"required,email"`
+    Password string `validate:"required,min=6"`
+}
+
+func TestValidateStruct_AllValid(t *testing.T) {
+    payload := testLoginPayload{
+        Email:    "user@example.com",
+        Password: "secret123",
+    }
+
+    errs := util.ValidateStruct(payload)
+
+    assert.Nil(t, errs)
+}
+
+func TestValidateStruct_InvalidEmail(t *testing.T) {
+    payload := testLoginPayload{
+        Email:    "bukan-email",
+        Password: "secret123",
+    }
+
+    errs := util.ValidateStruct(payload)
+
+    assert.NotNil(t, errs)
+    assert.Equal(t, 1, len(errs))
+    assert.Equal(t, "Email", errs[0].Field)
+    assert.Equal(t, "email", errs[0].Tag)
+}
+
+func TestValidateStruct_PasswordTooShort(t *testing.T) {
+    payload := testLoginPayload{
+        Email:    "user@example.com",
+        Password: "123",
+    }
+
+    errs := util.ValidateStruct(payload)
+
+    assert.NotNil(t, errs)
+    assert.Equal(t, 1, len(errs))
+    assert.Equal(t, "Password", errs[0].Field)
+    assert.Equal(t, "min", errs[0].Tag)
+}
+
+func TestValidateStruct_MultipleErrors(t *testing.T) {
+    payload := testLoginPayload{
+        Email:    "bukan-email",
+        Password: "123",
+    }
+
+    errs := util.ValidateStruct(payload)
+
+    assert.NotNil(t, errs)
+    assert.Equal(t, 2, len(errs))
+}
+
+func TestValidateStruct_EmptyFields(t *testing.T) {
+    payload := testLoginPayload{
+        Email:    "",
+        Password: "",
+    }
+
+    errs := util.ValidateStruct(payload)
+
+    assert.NotNil(t, errs)
+    assert.Equal(t, 2, len(errs))
+
+    fields := []string{errs[0].Field, errs[1].Field}
+    assert.Contains(t, fields, "Email")
+    assert.Contains(t, fields, "Password")
+}
+```
+
+---
+
+## Test Middleware
+
+Middleware test memverifikasi **behavior Protected dan OptionalAuth** tanpa konek ke database.
+
+### auth_middleware_test.go
+
+```go
+package middleware_test
+
+import (
+    "net/http"
+    "net/http/httptest"
+    "os"
+    "testing"
+
+    "starter-wahcah-be/internal/middleware"
+    "starter-wahcah-be/internal/util"
+
+    "github.com/gofiber/fiber/v2"
+    "github.com/stretchr/testify/assert"
+)
+
+func generateTestToken(userID uint) string {
+    os.Setenv("JWT_SECRET", "test-secret-key")
+    token, _ := util.GenerateToken(userID)
+    return token
+}
+
+func setupProtectedApp() *fiber.App {
+    app := fiber.New()
+    app.Get("/protected", middleware.Protected(), func(c *fiber.Ctx) error {
+        return c.JSON(fiber.Map{"user_id": c.Locals("user_id")})
+    })
+    return app
+}
+
+func setupOptionalApp() *fiber.App {
+    app := fiber.New()
+    app.Get("/optional", middleware.OptionalAuth(), func(c *fiber.Ctx) error {
+        return c.JSON(fiber.Map{"user_id": c.Locals("user_id")})
+    })
+    return app
+}
+
+// Protected: token valid
+func TestProtected_WithValidToken_ShouldPass(t *testing.T) {
+    os.Setenv("JWT_SECRET", "test-secret-key")
+    app := setupProtectedApp()
+
+    token := generateTestToken(1)
+    req := httptest.NewRequest(http.MethodGet, "/protected", nil)
+    req.Header.Set("Authorization", "Bearer "+token)
+
+    res, err := app.Test(req)
+
+    assert.NoError(t, err)
+    assert.Equal(t, http.StatusOK, res.StatusCode)
+}
+
+// Protected: tanpa token
+func TestProtected_WithoutToken_ShouldReturn401(t *testing.T) {
+    os.Setenv("JWT_SECRET", "test-secret-key")
+    app := setupProtectedApp()
+
+    req := httptest.NewRequest(http.MethodGet, "/protected", nil)
+
+    res, err := app.Test(req)
+
+    assert.NoError(t, err)
+    assert.Equal(t, http.StatusUnauthorized, res.StatusCode)
+}
+
+// Protected: token tidak valid
+func TestProtected_WithInvalidToken_ShouldReturn401(t *testing.T) {
+    os.Setenv("JWT_SECRET", "test-secret-key")
+    app := setupProtectedApp()
+
+    req := httptest.NewRequest(http.MethodGet, "/protected", nil)
+    req.Header.Set("Authorization", "Bearer token-tidak-valid")
+
+    res, err := app.Test(req)
+
+    assert.NoError(t, err)
+    assert.Equal(t, http.StatusUnauthorized, res.StatusCode)
+}
+
+// Protected: secret salah
+func TestProtected_WithWrongSecret_ShouldReturn401(t *testing.T) {
+    os.Setenv("JWT_SECRET", "secret-A")
+    token := generateTestToken(1)
+
+    os.Setenv("JWT_SECRET", "secret-B")
+    app := setupProtectedApp()
+
+    req := httptest.NewRequest(http.MethodGet, "/protected", nil)
+    req.Header.Set("Authorization", "Bearer "+token)
+
+    res, err := app.Test(req)
+
+    assert.NoError(t, err)
+    assert.Equal(t, http.StatusUnauthorized, res.StatusCode)
+}
+
+// OptionalAuth: token valid
+func TestOptionalAuth_WithValidToken_ShouldPass(t *testing.T) {
+    os.Setenv("JWT_SECRET", "test-secret-key")
+    app := setupOptionalApp()
+
+    token := generateTestToken(7)
+    req := httptest.NewRequest(http.MethodGet, "/optional", nil)
+    req.Header.Set("Authorization", "Bearer "+token)
+
+    res, err := app.Test(req)
+
+    assert.NoError(t, err)
+    assert.Equal(t, http.StatusOK, res.StatusCode)
+}
+
+// OptionalAuth: tanpa token tetap lanjut
+func TestOptionalAuth_WithoutToken_ShouldStillPass(t *testing.T) {
+    os.Setenv("JWT_SECRET", "test-secret-key")
+    app := setupOptionalApp()
+
+    req := httptest.NewRequest(http.MethodGet, "/optional", nil)
+
+    res, err := app.Test(req)
+
+    assert.NoError(t, err)
+    assert.Equal(t, http.StatusOK, res.StatusCode)
+}
+
+// OptionalAuth: token invalid tetap lanjut
+func TestOptionalAuth_WithInvalidToken_ShouldStillPass(t *testing.T) {
+    os.Setenv("JWT_SECRET", "test-secret-key")
+    app := setupOptionalApp()
+
+    req := httptest.NewRequest(http.MethodGet, "/optional", nil)
+    req.Header.Set("Authorization", "Bearer token-tidak-valid")
+
+    res, err := app.Test(req)
+
+    assert.NoError(t, err)
+    assert.Equal(t, http.StatusOK, res.StatusCode)
+}
+
+// OptionalAuth: secret salah tetap lanjut
+func TestOptionalAuth_WithWrongSecret_ShouldStillPass(t *testing.T) {
+    os.Setenv("JWT_SECRET", "secret-A")
+    token := generateTestToken(1)
+
+    os.Setenv("JWT_SECRET", "secret-B")
+    app := setupOptionalApp()
+
+    req := httptest.NewRequest(http.MethodGet, "/optional", nil)
+    req.Header.Set("Authorization", "Bearer "+token)
+
+    res, err := app.Test(req)
+
+    assert.NoError(t, err)
+    assert.Equal(t, http.StatusOK, res.StatusCode)
+}
+```
+
+---
+
+## Integration Test Repository
+
+Integration test menggunakan **SQLite in-memory** — tidak konek ke MySQL sungguhan, aman dijalankan di CI/CD.
+
+### Dependency Tambahan
+
+```bash
+go get gorm.io/driver/sqlite
+go mod tidy
+```
+
+### login_repository_integration_test.go
+
+```go
+package login_test
+
+import (
+    "testing"
+
+    "starter-wahcah-be/internal/models"
+    "starter-wahcah-be/internal/modules/auth/login"
+
+    "github.com/stretchr/testify/assert"
+    "gorm.io/driver/sqlite"
+    "gorm.io/gorm"
+    "gorm.io/gorm/logger"
+)
+
+func setupTestDB(t *testing.T) *gorm.DB {
+    db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{
+        Logger: logger.Default.LogMode(logger.Silent),
+    })
+    if err != nil {
+        t.Fatalf("Failed to open test database: %v", err)
+    }
+
+    if err := db.AutoMigrate(&models.User{}); err != nil {
+        t.Fatalf("Failed to migrate test database: %v", err)
+    }
+
+    return db
+}
+
+func seedTestUser(db *gorm.DB, email, password string) *models.User {
+    user := &models.User{Email: email, Password: password}
+    db.Create(user)
+    return user
+}
+
+func TestIntegration_Repository_FindByEmail_Success(t *testing.T) {
+    db := setupTestDB(t)
+    seedTestUser(db, "member@example.com", "hashedpassword")
+
+    repo := login.NewLoginRepository(db)
+    result, err := repo.FindByEmail("member@example.com")
+
+    assert.NoError(t, err)
+    assert.NotNil(t, result)
+    assert.Equal(t, "member@example.com", result.Email)
+}
+
+func TestIntegration_Repository_FindByEmail_NotFound(t *testing.T) {
+    db := setupTestDB(t)
+
+    repo := login.NewLoginRepository(db)
+    _, err := repo.FindByEmail("ghost@example.com")
+
+    assert.Error(t, err)
+}
+
+func TestIntegration_Repository_FindByEmail_ReturnsCorrectUser(t *testing.T) {
+    db := setupTestDB(t)
+    seedTestUser(db, "user1@example.com", "hash1")
+    seedTestUser(db, "user2@example.com", "hash2")
+
+    repo := login.NewLoginRepository(db)
+    result, err := repo.FindByEmail("user2@example.com")
+
+    assert.NoError(t, err)
+    assert.Equal(t, "user2@example.com", result.Email)
+    assert.Equal(t, "hash2", result.Password)
+}
+
+func TestIntegration_Repository_FindByEmail_ReturnPasswordHash(t *testing.T) {
+    db := setupTestDB(t)
+    seedTestUser(db, "member@example.com", "$2a$14$hashedpasswordexample")
+
+    repo := login.NewLoginRepository(db)
+    result, err := repo.FindByEmail("member@example.com")
+
+    assert.NoError(t, err)
+    assert.Equal(t, "$2a$14$hashedpasswordexample", result.Password)
+}
+```
+
+---
+
 ## Checklist Membuat Module Baru
 
 Ikuti urutan ini setiap kali membuat feature baru:
 
 ```
-[ ] 1. Buat folder internal/modules/{domain}/{feature}/
-[ ] 2. Buat {feature}_dto.go         — definisikan Request & Response struct
-[ ] 3. Buat {feature}_repository.go  — interface + implementasi + constructor
-[ ] 4. Buat {feature}_service.go     — interface + implementasi + constructor
-[ ] 5. Buat {feature}_controller.go  — struct Controller + method handler
-[ ] 6. Buat {feature}_router.go      — fungsi InitRoutes + wiring dependency
-[ ] 7. Daftarkan InitRoutes di internal/router/router.go
-[ ] 8. Jalankan make mock             — generate mock otomatis
-[ ] 9. Buat {feature}_repository_test.go
+[ ] 1.  Buat folder internal/modules/{domain}/{feature}/
+[ ] 2.  Buat {feature}_dto.go          - definisikan Request & Response struct
+[ ] 3.  Buat {feature}_repository.go   - interface + implementasi + constructor
+[ ] 4.  Buat {feature}_service.go      - interface + implementasi + constructor
+[ ] 5.  Buat {feature}_controller.go   - struct Controller + method handler
+[ ] 6.  Buat {feature}_router.go       - fungsi InitRoutes + wiring dependency
+[ ] 7.  Daftarkan InitRoutes di internal/router/router.go
+[ ] 8.  Jalankan make mock              - generate mock otomatis
+[ ] 9.  Buat {feature}_repository_test.go
 [ ] 10. Buat {feature}_service_test.go
 [ ] 11. Buat {feature}_controller_test.go
 [ ] 12. Buat {feature}_router_test.go
-[ ] 13. Jalankan make test            — pastikan semua PASS
+[ ] 13. Buat {feature}_repository_integration_test.go
+[ ] 14. Jalankan make test              - pastikan semua PASS
 ```
 
 ---
@@ -726,13 +1255,16 @@ Ikuti urutan ini setiap kali membuat feature baru:
 ## Perintah Penting
 
 ```bash
-make run            # Jalankan server
-make dev            # Jalankan dengan live reload (air)
-make mock           # Generate semua mock di internal/modules
-make test           # Jalankan semua test di internal/modules
-make test-coverage  # Test + laporan coverage HTML
-make test-pkg PKG=./internal/modules/auth/login/...  # Test satu package
-make fmt            # Format semua kode
-make tidy           # Tidy dependencies
-make help           # Lihat semua perintah
+make run                                              # Jalankan server
+make dev                                              # Live reload dengan air
+make mock                                             # Generate semua mock di internal/modules
+make test                                             # Semua test (unit + integration + util + middleware)
+make test-unit                                        # Hanya test modules
+make test-util                                        # Hanya test util dan middleware
+make test-integration                                 # Hanya integration test
+make test-pkg PKG=./internal/modules/auth/login/...  # Test satu package spesifik
+make test-coverage                                    # Test + laporan coverage HTML
+make fmt                                              # Format semua kode
+make tidy                                             # Tidy dependencies
+make help                                             # Lihat semua perintah
 ```
