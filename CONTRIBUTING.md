@@ -6,21 +6,143 @@ Dokumen ini menjelaskan aturan penulisan kode untuk setiap layer, mulai dari pen
 
 ## Daftar Isi
 
-1. [Struktur Folder](#struktur-folder)
-2. [Aturan Umum](#aturan-umum)
-3. [Layer DTO](#layer-dto)
-4. [Layer Repository](#layer-repository)
-5. [Layer Service](#layer-service)
-6. [Layer Controller](#layer-controller)
-7. [Layer Router](#layer-router)
-8. [Unit Test per Layer](#unit-test-per-layer)
-9. [Test Util](#test-util)
-10. [Test Middleware](#test-middleware)
-11. [Integration Test Repository](#integration-test-repository)
-12. [Checklist Membuat Module Baru](#checklist-membuat-module-baru)
-13. [Perintah Penting](#perintah-penting)
+1. [Memulai Project Baru](#memulai-project-baru)
+2. [Struktur Folder](#struktur-folder)
+3. [Aturan Umum](#aturan-umum)
+4. [Layer DTO](#layer-dto)
+5. [Layer Repository](#layer-repository)
+6. [Layer Service](#layer-service)
+7. [Layer Controller](#layer-controller)
+8. [Layer Router](#layer-router)
+9. [Unit Test per Layer](#unit-test-per-layer)
+10. [Test Util](#test-util)
+11. [Test Middleware](#test-middleware)
+12. [Integration Test Repository](#integration-test-repository)
+13. [Checklist Membuat Module Baru](#checklist-membuat-module-baru)
+14. [Perintah Penting](#perintah-penting)
 
 ---
+
+## Memulai Project Baru
+
+Starter ini dirancang untuk di-clone lalu langsung diganti namanya menjadi project Anda. Ikuti langkah berikut secara berurutan.
+
+### Langkah 1 — Clone Repository
+
+```bash
+git clone https://github.com/your-username/starter-wahcah-be.git nama-project-baru
+cd nama-project-baru
+```
+
+### Langkah 2 — Inisialisasi Nama Project
+
+Jalankan script init untuk mengganti semua referensi `starter-wahcah-be` menjadi nama project Anda. Script ini akan menyentuh semua file `*.go`, `go.mod`, `.env`, `*.yaml`, `*.yml`, `*.md`, dan `Makefile` sekaligus.
+
+**Interaktif** — akan ditanya nama project:
+```bash
+sh init-project.sh
+```
+
+**Langsung dengan argumen:**
+```bash
+sh init-project.sh my-awesome-api
+# atau
+make init PROJECT=my-awesome-api
+```
+
+Contoh output:
+```
+Mengganti 'starter-wahcah-be' -> 'my-awesome-api' ...
+
+  updated: go.mod
+  updated: Makefile
+  updated: cmd/api/main.go
+  updated: config/database.go
+  updated: internal/modules/auth/login/login_service.go
+  updated: internal/seeder/user_seeder.go
+  updated: CONTRIBUTING.md
+  ...
+
+Selesai! Project berhasil diinisialisasi sebagai 'my-awesome-api'.
+```
+
+> **Catatan:** Script hanya boleh dijalankan **sekali** setelah clone. Jika dijalankan ulang, nama lama sudah tidak ada dan tidak ada yang berubah.
+
+### Langkah 3 — Sesuaikan .env
+
+Buka file `.env` dan sesuaikan konfigurasi:
+
+```env
+APP_NAME=my-awesome-api
+APP_ENV=development
+
+DB_HOST=db
+DB_PORT=3306
+DB_USER=your_db_user
+DB_PASSWORD=your_db_password
+DB_NAME=your_db_name
+
+JWT_SECRET=ganti-dengan-string-acak-yang-panjang
+```
+
+Generate JWT_SECRET yang aman:
+```bash
+openssl rand -base64 32
+```
+
+### Langkah 4 — Install Dependencies
+
+```bash
+make tidy
+```
+
+### Langkah 5 — Generate Mock
+
+```bash
+make mock
+```
+
+### Langkah 6 — Jalankan Test
+
+Pastikan semua test bawaan starter masih PASS sebelum mulai development:
+
+```bash
+make test
+```
+
+Output yang diharapkan:
+```
+PASS
+ok    my-awesome-api/internal/modules/auth/login   5.4s
+ok    my-awesome-api/internal/util                 0.1s
+ok    my-awesome-api/internal/middleware            0.1s
+```
+
+### Langkah 7 — Jalankan Server
+
+```bash
+make dev
+```
+
+Server berjalan di `http://localhost:8080`. Health check tersedia di:
+```bash
+curl http://localhost:8080/health
+# {"status":"ok","env":"development"}
+```
+
+### Langkah 8 — Reset Git History (Opsional)
+
+Jika tidak ingin membawa history commit starter ini:
+
+```bash
+rm -rf .git
+git init
+git add .
+git commit -m "feat: init project my-awesome-api"
+```
+
+---
+
 
 ## Struktur Folder
 
