@@ -38,7 +38,8 @@ air
 # Test endpoint
 
 ```url
-POST http://localhost:9090/apiv1//auth/login
+POST http://localhost:9090/api/v1//auth/login
+POST http://localhost:9090/api/v1//auth/register
 ```
 
 request raw body :

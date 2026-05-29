@@ -18,6 +18,7 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	// proteksi
 	// middleware.OptionalAuth() -> optional login atau tidak
 	// middleware.Protected() -> wajib login
+	// middleware.HasPermission(db, "role:read") -> cek permissions
 
 	login.InitRoutes(v1, db)
 	register.InitRoutes(v1, db)
