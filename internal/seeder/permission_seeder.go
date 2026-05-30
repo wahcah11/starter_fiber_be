@@ -12,10 +12,12 @@ func SeedPermissions(db *gorm.DB) error {
 			"user:create", "user:read", "user:update", "user:delete",
 			"role:create", "role:read", "role:update", "role:delete",
 			"permission:create", "permission:read", "permission:update", "permission:delete",
+			"user_role:read", "user_role:create", "user_role:delete",
 		},
 		"admin": {
 			"user:create", "user:read", "user:update",
 			"role:read", "permission:read",
+			"user_role:read", "user_role:create",
 		},
 		"member": {
 			"user:read",

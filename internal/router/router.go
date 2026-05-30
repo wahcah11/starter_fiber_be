@@ -5,6 +5,7 @@ import (
 	"starter-wahcah-be/internal/modules/auth/register"
 	"starter-wahcah-be/internal/modules/permission/crud_permission"
 	"starter-wahcah-be/internal/modules/role/crud"
+	"starter-wahcah-be/internal/modules/user_role/crud_user_role"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
@@ -26,4 +27,5 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	register.InitRoutes(v1, db)
 	crud.InitRoutes(v1, db)
 	crud_permission.InitRoutes(v1, db)
+	crud_user_role.InitRoutes(v1, db)
 }
