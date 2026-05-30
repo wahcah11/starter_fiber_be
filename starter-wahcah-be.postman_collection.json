@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "starter-wahcah-be",
-    "description": "API Collection lengkap untuk starter-wahcah-be\n\nEndpoints:\n- Health Check\n- Auth (Login, Register)\n- Roles CRUD",
+    "description": "API Collection lengkap untuk starter-wahcah-be\n\nEndpoints:\n- Health Check\n- Auth (Login, Register)\n- Roles CRUD\n- Permissions CRUD",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -173,7 +173,7 @@
                   "host": ["{{baseUrl}}"],
                   "path": ["auth", "login"]
                 },
-                "description": "Login sebagai superadmin. Token JWT otomatis tersimpan ke {{token}}.\nSuperadmin punya semua permission termasuk role:read, role:create, role:update, role:delete."
+                "description": "Login sebagai superadmin. Token JWT otomatis tersimpan ke {{token}}.\nSuperadmin punya semua permission termasuk role:*, permission:*, user:*."
               },
               "response": []
             },
@@ -207,7 +207,7 @@
                   "host": ["{{baseUrl}}"],
                   "path": ["auth", "login"]
                 },
-                "description": "Login sebagai admin. Token JWT otomatis tersimpan ke {{token}}.\nAdmin punya permission: user:create, user:read, user:update, role:read."
+                "description": "Login sebagai admin. Token JWT otomatis tersimpan ke {{token}}.\nAdmin punya permission: user:create, user:read, user:update, role:read, permission:read."
               },
               "response": []
             },
@@ -241,7 +241,7 @@
                   "host": ["{{baseUrl}}"],
                   "path": ["auth", "login"]
                 },
-                "description": "Login sebagai member. Token JWT otomatis tersimpan ke {{token}}.\nMember hanya punya permission: user:read.\nGunakan untuk test 403 Forbidden di endpoint roles."
+                "description": "Login sebagai member. Token JWT otomatis tersimpan ke {{token}}.\nMember hanya punya permission: user:read.\nGunakan untuk test 403 Forbidden."
               },
               "response": []
             },
@@ -324,7 +324,7 @@
                 { "key": "limit", "value": "10" }
               ]
             },
-            "description": "Ambil semua role dengan pagination.\nPermission: role:read\nQuery params: page (default 1), limit (default 10, max 100)"
+            "description": "Ambil semua role dengan pagination.\nPermission: role:read"
           },
           "response": []
         },
@@ -370,7 +370,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["roles"]
             },
-            "description": "Login sebagai member dulu, lalu hit endpoint ini.\nExpect: 403 Forbidden — member tidak punya role:read"
+            "description": "Login sebagai member dulu, lalu hit endpoint ini.\nExpect: 403 Forbidden"
           },
           "response": []
         },
@@ -478,7 +478,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["roles"]
             },
-            "description": "Expect: 400 validation error — name dan system_function required"
+            "description": "Expect: 400 validation error"
           },
           "response": []
         },
@@ -580,7 +580,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["roles", "4"]
             },
-            "description": "Hapus role berdasarkan ID (soft delete via gorm.Model).\nPermission: role:delete\nGanti angka 4 dengan ID role yang ingin dihapus."
+            "description": "Hapus role berdasarkan ID (soft delete).\nPermission: role:delete\nGanti angka 4 dengan ID role yang ingin dihapus."
           },
           "response": []
         },
@@ -609,6 +609,350 @@
               "path": ["roles", "abc"]
             },
             "description": "Expect: 400 Invalid role ID"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Permissions",
+      "description": "CRUD Permissions — semua endpoint membutuhkan JWT token dengan permission yang sesuai.\nLogin sebagai Superadmin terlebih dahulu untuk mendapatkan akses penuh.",
+      "item": [
+        {
+          "name": "Get All Permissions — Sukses",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/permissions?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["permissions"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" }
+              ]
+            },
+            "description": "Ambil semua permission lintas role dengan pagination.\nPermission: permission:read"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Permissions — Filter By Role ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/permissions?page=1&limit=10&role_id=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["permissions"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "role_id", "value": "1" }
+              ]
+            },
+            "description": "Ambil semua permission milik role tertentu.\nGanti role_id=1 dengan ID role yang diinginkan.\nPermission: permission:read"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Permissions — Halaman 2",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/permissions?page=2&limit=5",
+              "host": ["{{baseUrl}}"],
+              "path": ["permissions"],
+              "query": [
+                { "key": "page", "value": "2" },
+                { "key": "limit", "value": "5" }
+              ]
+            },
+            "description": "Test pagination halaman 2.\nPermission: permission:read"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Permissions — Role ID Tidak Valid",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/permissions?role_id=abc",
+              "host": ["{{baseUrl}}"],
+              "path": ["permissions"],
+              "query": [
+                { "key": "role_id", "value": "abc" }
+              ]
+            },
+            "description": "Expect: 400 Invalid role_id"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Permissions — Tanpa Token",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/permissions",
+              "host": ["{{baseUrl}}"],
+              "path": ["permissions"]
+            },
+            "description": "Expect: 401 Unauthorized"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Permissions — Token Member (Forbidden)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/permissions",
+              "host": ["{{baseUrl}}"],
+              "path": ["permissions"]
+            },
+            "description": "Login sebagai member dulu, lalu hit endpoint ini.\nExpect: 403 Forbidden"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Permission By ID — Sukses",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/permissions/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["permissions", "1"]
+            },
+            "description": "Ambil detail permission berdasarkan ID.\nPermission: permission:read"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Permission By ID — Tidak Ditemukan",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/permissions/9999",
+              "host": ["{{baseUrl}}"],
+              "path": ["permissions", "9999"]
+            },
+            "description": "Expect: 404 permission not found"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Permission By ID — ID Tidak Valid",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/permissions/abc",
+              "host": ["{{baseUrl}}"],
+              "path": ["permissions", "abc"]
+            },
+            "description": "Expect: 400 Invalid permission ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Permission — Sukses",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role_id\": 1,\n  \"name\": \"role:delete\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/permissions",
+              "host": ["{{baseUrl}}"],
+              "path": ["permissions"]
+            },
+            "description": "Buat permission baru untuk role tertentu.\nKombinasi role_id + name harus unik.\nPermission: permission:create"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Permission — Sudah Ada",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role_id\": 1,\n  \"name\": \"role:read\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/permissions",
+              "host": ["{{baseUrl}}"],
+              "path": ["permissions"]
+            },
+            "description": "Expect: 400 permission already exists for this role"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Permission — Validasi Gagal",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/permissions",
+              "host": ["{{baseUrl}}"],
+              "path": ["permissions"]
+            },
+            "description": "Expect: 400 validation error — role_id dan name required"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Permission — Sukses",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role_id\": 1,\n  \"name\": \"role:read-updated\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/permissions/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["permissions", "1"]
+            },
+            "description": "Update permission berdasarkan ID.\nBisa update name atau pindah ke role lain (ubah role_id).\nPermission: permission:update\nGanti angka 1 dengan ID permission yang ingin diupdate."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Permission — Tidak Ditemukan",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role_id\": 1,\n  \"name\": \"role:read\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/permissions/9999",
+              "host": ["{{baseUrl}}"],
+              "path": ["permissions", "9999"]
+            },
+            "description": "Expect: 404 permission not found"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Permission — Kombinasi Sudah Dipakai",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role_id\": 1,\n  \"name\": \"role:create\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/permissions/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["permissions", "1"]
+            },
+            "description": "Expect: 400 permission already exists for this role"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Permission — Validasi Gagal",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/permissions/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["permissions", "1"]
+            },
+            "description": "Expect: 400 validation error"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Permission — Sukses",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/permissions/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["permissions", "1"]
+            },
+            "description": "Hapus permission berdasarkan ID (soft delete).\nPermission: permission:delete\nGanti angka 1 dengan ID permission yang ingin dihapus."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Permission — Tidak Ditemukan",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/permissions/9999",
+              "host": ["{{baseUrl}}"],
+              "path": ["permissions", "9999"]
+            },
+            "description": "Expect: 404 permission not found"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Permission — ID Tidak Valid",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/permissions/abc",
+              "host": ["{{baseUrl}}"],
+              "path": ["permissions", "abc"]
+            },
+            "description": "Expect: 400 Invalid permission ID"
           },
           "response": []
         }

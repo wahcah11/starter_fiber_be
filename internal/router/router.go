@@ -3,6 +3,7 @@ package router
 import (
 	"starter-wahcah-be/internal/modules/auth/login"
 	"starter-wahcah-be/internal/modules/auth/register"
+	"starter-wahcah-be/internal/modules/permission/crud_permission"
 	"starter-wahcah-be/internal/modules/role/crud"
 
 	"github.com/gofiber/fiber/v2"
@@ -24,4 +25,5 @@ func SetupRoutes(app *fiber.App, db *gorm.DB) {
 	login.InitRoutes(v1, db)
 	register.InitRoutes(v1, db)
 	crud.InitRoutes(v1, db)
+	crud_permission.InitRoutes(v1, db)
 }
