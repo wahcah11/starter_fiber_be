@@ -1,0 +1,618 @@
+{
+  "info": {
+    "name": "starter-wahcah-be",
+    "description": "API Collection lengkap untuk starter-wahcah-be\n\nEndpoints:\n- Health Check\n- Auth (Login, Register)\n- Roles CRUD",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:9090/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string",
+      "description": "JWT token — otomatis terisi setelah login berhasil"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:9090/health",
+              "host": ["http://localhost:9090"],
+              "path": ["health"]
+            },
+            "description": "Cek apakah server berjalan"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "item": [
+            {
+              "name": "Register — Sukses",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"newuser@example.com\",\n  \"password\": \"secret123\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/register",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "register"]
+                },
+                "description": "Registrasi user baru. Role default (member) otomatis di-assign."
+              },
+              "response": []
+            },
+            {
+              "name": "Register — Email Sudah Terdaftar",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"newuser@example.com\",\n  \"password\": \"secret123\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/register",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "register"]
+                },
+                "description": "Expect: 400 email already registered"
+              },
+              "response": []
+            },
+            {
+              "name": "Register — Email Tidak Valid",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"bukan-email\",\n  \"password\": \"secret123\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/register",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "register"]
+                },
+                "description": "Expect: 400 validation error"
+              },
+              "response": []
+            },
+            {
+              "name": "Register — Password Terlalu Pendek",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"newuser@example.com\",\n  \"password\": \"123\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/register",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "register"]
+                },
+                "description": "Expect: 400 validation error min=6"
+              },
+              "response": []
+            },
+            {
+              "name": "Register — Body Kosong",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/register",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "register"]
+                },
+                "description": "Expect: 400 validation error semua field required"
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "item": [
+            {
+              "name": "Login — Sukses (Superadmin)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "const res = pm.response.json();",
+                      "if (res.data && res.data.token) {",
+                      "    pm.collectionVariables.set('token', res.data.token);",
+                      "    console.log('Token saved:', res.data.token);",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"superadmin@example.com\",\n  \"password\": \"superadmin123\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "login"]
+                },
+                "description": "Login sebagai superadmin. Token JWT otomatis tersimpan ke {{token}}.\nSuperadmin punya semua permission termasuk role:read, role:create, role:update, role:delete."
+              },
+              "response": []
+            },
+            {
+              "name": "Login — Sukses (Admin)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "const res = pm.response.json();",
+                      "if (res.data && res.data.token) {",
+                      "    pm.collectionVariables.set('token', res.data.token);",
+                      "    console.log('Token saved:', res.data.token);",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"admin123\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "login"]
+                },
+                "description": "Login sebagai admin. Token JWT otomatis tersimpan ke {{token}}.\nAdmin punya permission: user:create, user:read, user:update, role:read."
+              },
+              "response": []
+            },
+            {
+              "name": "Login — Sukses (Member)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "const res = pm.response.json();",
+                      "if (res.data && res.data.token) {",
+                      "    pm.collectionVariables.set('token', res.data.token);",
+                      "    console.log('Token saved:', res.data.token);",
+                      "}"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"member@example.com\",\n  \"password\": \"member123\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "login"]
+                },
+                "description": "Login sebagai member. Token JWT otomatis tersimpan ke {{token}}.\nMember hanya punya permission: user:read.\nGunakan untuk test 403 Forbidden di endpoint roles."
+              },
+              "response": []
+            },
+            {
+              "name": "Login — Email Tidak Terdaftar",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"ghost@example.com\",\n  \"password\": \"secret123\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "login"]
+                },
+                "description": "Expect: 401 invalid email or password"
+              },
+              "response": []
+            },
+            {
+              "name": "Login — Password Salah",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"superadmin@example.com\",\n  \"password\": \"wrongpassword\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "login"]
+                },
+                "description": "Expect: 401 invalid email or password"
+              },
+              "response": []
+            },
+            {
+              "name": "Login — Body Kosong",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "login"]
+                },
+                "description": "Expect: 400 validation error"
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Roles",
+      "description": "CRUD Roles — semua endpoint membutuhkan JWT token dengan permission yang sesuai.\nLogin sebagai Superadmin terlebih dahulu untuk mendapatkan akses penuh.",
+      "item": [
+        {
+          "name": "Get All Roles — Sukses",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/roles?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["roles"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" }
+              ]
+            },
+            "description": "Ambil semua role dengan pagination.\nPermission: role:read\nQuery params: page (default 1), limit (default 10, max 100)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Roles — Halaman 2",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/roles?page=2&limit=2",
+              "host": ["{{baseUrl}}"],
+              "path": ["roles"],
+              "query": [
+                { "key": "page", "value": "2" },
+                { "key": "limit", "value": "2" }
+              ]
+            },
+            "description": "Test pagination halaman 2 dengan limit 2.\nPermission: role:read"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Roles — Tanpa Token",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/roles",
+              "host": ["{{baseUrl}}"],
+              "path": ["roles"]
+            },
+            "description": "Expect: 401 Unauthorized"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Roles — Token Member (Forbidden)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/roles",
+              "host": ["{{baseUrl}}"],
+              "path": ["roles"]
+            },
+            "description": "Login sebagai member dulu, lalu hit endpoint ini.\nExpect: 403 Forbidden — member tidak punya role:read"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Role By ID — Sukses",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/roles/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["roles", "1"]
+            },
+            "description": "Ambil detail role berdasarkan ID.\nPermission: role:read"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Role By ID — Tidak Ditemukan",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/roles/9999",
+              "host": ["{{baseUrl}}"],
+              "path": ["roles", "9999"]
+            },
+            "description": "Expect: 404 role not found"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Role By ID — ID Tidak Valid",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/roles/abc",
+              "host": ["{{baseUrl}}"],
+              "path": ["roles", "abc"]
+            },
+            "description": "Expect: 400 Invalid role ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Role — Sukses",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"editor\",\n  \"system_function\": \"edit_access\",\n  \"is_default\": false\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/roles",
+              "host": ["{{baseUrl}}"],
+              "path": ["roles"]
+            },
+            "description": "Buat role baru.\nPermission: role:create"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Role — Nama Sudah Ada",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"member\",\n  \"system_function\": \"basic_access\",\n  \"is_default\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/roles",
+              "host": ["{{baseUrl}}"],
+              "path": ["roles"]
+            },
+            "description": "Expect: 400 role name already exists"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Role — Validasi Gagal",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/roles",
+              "host": ["{{baseUrl}}"],
+              "path": ["roles"]
+            },
+            "description": "Expect: 400 validation error — name dan system_function required"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Role — Sukses",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"editor-updated\",\n  \"system_function\": \"edit_access_v2\",\n  \"is_default\": false\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/roles/4",
+              "host": ["{{baseUrl}}"],
+              "path": ["roles", "4"]
+            },
+            "description": "Update role berdasarkan ID.\nPermission: role:update\nGanti angka 4 dengan ID role yang ingin diupdate."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Role — Tidak Ditemukan",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"editor\",\n  \"system_function\": \"edit_access\",\n  \"is_default\": false\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/roles/9999",
+              "host": ["{{baseUrl}}"],
+              "path": ["roles", "9999"]
+            },
+            "description": "Expect: 404 role not found"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Role — Nama Dipakai Role Lain",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"admin\",\n  \"system_function\": \"edit_access\",\n  \"is_default\": false\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/roles/4",
+              "host": ["{{baseUrl}}"],
+              "path": ["roles", "4"]
+            },
+            "description": "Expect: 400 role name already exists"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Role — Validasi Gagal",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/roles/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["roles", "1"]
+            },
+            "description": "Expect: 400 validation error"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Role — Sukses",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/roles/4",
+              "host": ["{{baseUrl}}"],
+              "path": ["roles", "4"]
+            },
+            "description": "Hapus role berdasarkan ID (soft delete via gorm.Model).\nPermission: role:delete\nGanti angka 4 dengan ID role yang ingin dihapus."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Role — Tidak Ditemukan",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/roles/9999",
+              "host": ["{{baseUrl}}"],
+              "path": ["roles", "9999"]
+            },
+            "description": "Expect: 404 role not found"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Role — ID Tidak Valid",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/roles/abc",
+              "host": ["{{baseUrl}}"],
+              "path": ["roles", "abc"]
+            },
+            "description": "Expect: 400 Invalid role ID"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
