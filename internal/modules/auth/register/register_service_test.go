@@ -9,6 +9,7 @@ import (
 	"starter-wahcah-be/internal/modules/auth/register/mocks"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 func TestService_Register_Success(t *testing.T) {
@@ -18,17 +19,23 @@ func TestService_Register_Success(t *testing.T) {
 	mockRepo.On("FindByEmail", "newuser@example.com").
 		Return(&models.User{}, errors.New("record not found"))
 
-	// Create user berhasil
-	mockRepo.On("Create", mock_AnyUser()).
-		Return(nil)
+	// Create user berhasil — set ID via Run agar CreateUserRole bisa dipanggil
+	mockRepo.On("Create", mock.MatchedBy(func(u *models.User) bool {
+		return u.Email == "newuser@example.com"
+	})).Run(func(args mock.Arguments) {
+		user := args.Get(0).(*models.User)
+		user.ID = 1 // simulasi ID yang di-set DB setelah insert
+	}).Return(nil)
 
-	// Ada role default
-	mockRepo.On("FindDefaultRole").
-		Return(&models.Role{Name: "member", IsDefault: true}, nil)
+	// Ada role default dengan ID
+	defaultRole := &models.Role{Name: "member", IsDefault: true}
+	defaultRole.ID = 1
+	mockRepo.On("FindDefaultRole").Return(defaultRole, nil)
 
-	// Assign role berhasil
-	mockRepo.On("CreateUserRole", mock_AnyUserRole()).
-		Return(nil)
+	// Assign role dipanggil karena user.ID dan defaultRole.ID keduanya != 0
+	mockRepo.On("CreateUserRole", mock.MatchedBy(func(ur *models.UserRole) bool {
+		return ur.UserID == 1 && ur.RoleID == 1
+	})).Return(nil)
 
 	svc := register.NewRegisterService(mockRepo)
 	res, err := svc.Register(register.RegisterRequest{
@@ -45,9 +52,9 @@ func TestService_Register_Success(t *testing.T) {
 func TestService_Register_EmailAlreadyRegistered(t *testing.T) {
 	mockRepo := new(mocks.Repository)
 
-	// Email sudah terdaftar — FindByEmail return user yang ada
-	mockRepo.On("FindByEmail", "existing@example.com").
-		Return(&models.User{Email: "existing@example.com"}, nil)
+	existing := &models.User{Email: "existing@example.com"}
+	existing.ID = 1
+	mockRepo.On("FindByEmail", "existing@example.com").Return(existing, nil)
 
 	svc := register.NewRegisterService(mockRepo)
 	res, err := svc.Register(register.RegisterRequest{
@@ -67,8 +74,9 @@ func TestService_Register_CreateFailed(t *testing.T) {
 	mockRepo.On("FindByEmail", "newuser@example.com").
 		Return(&models.User{}, errors.New("record not found"))
 
-	mockRepo.On("Create", mock_AnyUser()).
-		Return(errors.New("db error"))
+	mockRepo.On("Create", mock.MatchedBy(func(u *models.User) bool {
+		return u.Email == "newuser@example.com"
+	})).Return(errors.New("db error"))
 
 	svc := register.NewRegisterService(mockRepo)
 	res, err := svc.Register(register.RegisterRequest{
@@ -90,10 +98,11 @@ func TestService_Register_NoDefaultRole_StillSuccess(t *testing.T) {
 		Return(&models.User{}, errors.New("record not found"))
 
 	// Create user berhasil
-	mockRepo.On("Create", mock_AnyUser()).
-		Return(nil)
+	mockRepo.On("Create", mock.MatchedBy(func(u *models.User) bool {
+		return u.Email == "newuser@example.com"
+	})).Return(nil)
 
-	// Tidak ada role default — tetap lanjut, tidak return error
+	// Tidak ada role default — tetap lanjut
 	mockRepo.On("FindDefaultRole").
 		Return(&models.Role{}, errors.New("record not found"))
 
@@ -107,36 +116,4 @@ func TestService_Register_NoDefaultRole_StillSuccess(t *testing.T) {
 	assert.NotNil(t, res)
 	assert.Equal(t, "newuser@example.com", res.Email)
 	mockRepo.AssertExpectations(t)
-}
-
-// =========================================
-// Helpers — mock matcher untuk pointer struct
-// =========================================
-
-// mock_AnyUser mengembalikan matcher untuk *models.User apapun
-// karena nilai pointer tidak bisa diprediksi sebelum Create dipanggil
-func mock_AnyUser() interface{} {
-	return mock_matcherFunc(func(arg interface{}) bool {
-		_, ok := arg.(*models.User)
-		return ok
-	})
-}
-
-// mock_AnyUserRole mengembalikan matcher untuk *models.UserRole apapun
-func mock_AnyUserRole() interface{} {
-	return mock_matcherFunc(func(arg interface{}) bool {
-		_, ok := arg.(*models.UserRole)
-		return ok
-	})
-}
-
-// mock_matcherFunc adalah custom matcher untuk testify mock
-type mock_matcherFunc func(interface{}) bool
-
-func (f mock_matcherFunc) Matches(arg interface{}) bool {
-	return f(arg)
-}
-
-func (f mock_matcherFunc) String() string {
-	return "custom matcher"
 }
